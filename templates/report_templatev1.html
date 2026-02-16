@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CIS Benchmark Report - {{ host.host_ip }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #4a6491 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header-info {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .info-card {
+            background: rgba(255,255,255,0.1);
+            padding: 15px 25px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+        
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .card .number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .card .pass { color: #27ae60; }
+        .card .fail { color: #e74c3c; }
+        
+        .task-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .task-table th {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .task-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .task-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .task-table tr.even {
+            background: #f8f9fa;
+        }
+        
+        .task-table tr.odd {
+            background: white;
+        }
+        
+        .status-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .status-pass { background: #d5f4e6; color: #27ae60; }
+        .status-fail { background: #fadbd8; color: #e74c3c; }
+        
+        .details-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .details-btn:hover {
+            background: #2980b9;
+        }
+        
+        .output-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: white;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 10px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .close-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 768px) {
+            .header-info {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .task-table {
+                font-size: 0.9em;
+            }
+            
+            .task-table th, .task-table td {
+                padding: 10px;
+            }
+        }
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            font-size: 1.2em;
+            border: none;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.6);
+            background: linear-gradient(135deg, #2980b9, #1c6ea4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 CIS Benchmark Hardening Report</h1>
+            <div class="header-info">
+                <div class="info-card">
+                    <strong>IP:</strong> {{ host.host_ip }}
+                </div>
+                <div class="info-card">
+                    <strong>เวลา:</strong> {{ host.timestamp }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="summary-cards">
+            <div class="card">
+                <h3>Audit ครั้งที่ 1</h3>
+                <div class="number pass">{{ summary.step1_pass }}</div>
+                <p>ผ่าน</p>
+                <div class="number fail">{{ summary.step1_fail }}</div>
+                <p>ไม่ผ่าน</p>
+            </div>
+            
+            <div class="card">
+                <h3>Remediation</h3>
+                <div class="number pass">{{ summary.step2_pass }}</div>
+                <p>ผ่าน</p>
+                <div class="number fail">{{ summary.step2_fail }}</div>
+                <p>ไม่ผ่าน</p>
+            </div>
+            
+            <div class="card">
+                <h3>Audit ครั้งที่ 2</h3>
+                <div class="number pass">{{ summary.step3_pass }}</div>
+                <p>ผ่าน</p>
+                <div class="number fail">{{ summary.step3_fail }}</div>
+                <p>ไม่ผ่าน</p>
+            </div>
+            
+            <div class="card">
+                <h3>Overall</h3>
+                <div class="number" style="color: #9b59b6;">{{ summary.completed_tasks }}/{{ summary.total_tasks }}</div>
+                <p>งานที่เสร็จสมบูรณ์</p>
+                <div class="number" style="color: #9b59b6;">
+                    {{ "%.1f"|format(summary.step3_pass / summary.total_tasks * 100 if summary.total_tasks > 0 else 0) }}%
+                </div>
+                <p>อัตราการผ่าน</p>
+            </div>
+        </div>
+        
+        <div style="padding: 30px;">
+            <h2 style="color: #2c3e50; margin-bottom: 20px;">รายละเอียดงานทั้งหมด</h2>
+            <table class="task-table">
+                <thead>
+                    <tr>
+                        <th width="10%">ID</th>
+                        <th width="40%">Description</th>
+                        <th width="15%">Audit ครั้งที่ 1</th>
+                        <th width="15%">Remediation</th>
+                        <th width="15%">Audit ครั้งที่ 2</th>
+                        <th width="5%"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in host.tasks %}
+                    <tr class="{{ task.row_class }}">
+                        <td><strong>{{ task.id }}</strong></td>
+                        <td>{{ task.description }}</td>
+                        <td>
+                            <span class="status-badge status-{{ task.step1_status|lower }}">
+                                {{ task.step1_status }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-{{ task.step2_status|lower }}">
+                                {{ task.step2_status }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-{{ task.step3_status|lower }}">
+                                {{ task.step3_status }}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="details-btn" onclick="showOutput('{{ task.id }}')">
+                                Open Logs
+                            </button>
+                        </td>
+                    </tr>
+                    
+                    <!-- Hidden output divs -->
+                    <div id="output-{{ task.id }}" style="display: none;">
+                        <h3>{{ task.id }} - {{ task.description }}</h3>
+                        <h4>Audit ครั้งที่ 1 Output:</h4>
+                        <pre style="background: #f4f4f4; padding: 10px; border-radius: 5px; overflow: auto;">{{ task.step1_output }}</pre>
+                        <h4>Remediation Output:</h4>
+                        <pre style="background: #f4f4f4; padding: 10px; border-radius: 5px; overflow: auto;">{{ task.step2_output }}</pre>
+                        <h4>Audit ครั้งที่ 2 Output:</h4>
+                        <pre style="background: #f4f4f4; padding: 10px; border-radius: 5px; overflow: auto;">{{ task.step3_output }}</pre>
+                    </div>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="footer">
+        </div>
+    </div>
+    
+    <!-- Output Modal -->
+    <div id="outputModal" class="output-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Task Output Details</h2>
+                <button class="close-btn" onclick="closeOutput()">✕ ปิด</button>
+            </div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+    
+    <script>
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+        
+        // ตรวจสอบการเลื่อนหน้าเพื่อแสดง/ซ่อนปุ่ม To Top
+        window.addEventListener('scroll', function() {
+            const backToTopButton = document.getElementById('backToTop');
+            if (window.scrollY > 300) {
+                backToTopButton.classList.add('visible');
+            } else {
+                backToTopButton.classList.remove('visible');
+            }
+        });
+        
+        // ตรวจสอบเมื่อโหลดหน้าเสร็จ
+        document.addEventListener('DOMContentLoaded', function() {
+            // ...โค้ดเดิม...
+            
+            // กำหนดเริ่มต้นปุ่ม To Top
+            const backToTopButton = document.getElementById('backToTop');
+            backToTopButton.classList.remove('visible');
+        });
+        function showOutput(taskId) {
+            const outputDiv = document.getElementById(`output-${taskId}`);
+            const modalBody = document.getElementById('modalBody');
+            const modal = document.getElementById('outputModal');
+            
+            modalBody.innerHTML = outputDiv.innerHTML;
+            modal.style.display = 'block';
+        }
+        
+        function closeOutput() {
+            document.getElementById('outputModal').style.display = 'none';
+        }
+        
+        // ปิด modal เมื่อคลิกนอกพื้นที่
+        window.onclick = function(event) {
+            const modal = document.getElementById('outputModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        // เพิ่ม animation ให้กับ cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+                card.style.animation = 'fadeInUp 0.5s ease forwards';
+            });
+        });
+
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+        
+        // ตรวจสอบการเลื่อนหน้าเพื่อแสดง/ซ่อนปุ่ม To Top
+        window.addEventListener('scroll', function() {
+            const backToTopButton = document.getElementById('backToTop');
+            if (window.scrollY > 300) {
+                backToTopButton.classList.add('visible');
+            } else {
+                backToTopButton.classList.remove('visible');
+            }
+        });
+        
+        // ตรวจสอบเมื่อโหลดหน้าเสร็จ
+        document.addEventListener('DOMContentLoaded', function() {
+            // ...โค้ดเดิม...
+            
+            // กำหนดเริ่มต้นปุ่ม To Top
+            const backToTopButton = document.getElementById('backToTop');
+            backToTopButton.classList.remove('visible');
+        });
+    </script>
+
+    <style>
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+    <!-- Back to Top Button -->
+    <button id="backToTop" class="back-to-top" onclick="scrollToTop()">
+        ↑
+    </button>
+</body>
+</html>
