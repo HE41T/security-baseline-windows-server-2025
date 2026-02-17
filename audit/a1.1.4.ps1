@@ -1,0 +1,53 @@
+# ==============================================================
+# CIS Check: 1.1.4 (L1) - Audit Script
+# Description: Ensure 'Minimum password length' is set to '14 or more character(s)'
+# ==============================================================
+
+$Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+$DesiredValue = 14
+
+Write-Host "=============================================================="
+Write-Host "Audit started: $Date"
+Write-Host "Control 1.1.4: Ensure 'Minimum password length' is >= $DesiredValue"
+Write-Host "=============================================================="
+
+try {
+    # Check via net accounts
+    $NetOutput = net accounts | Select-String "Minimum password length"
+    
+    if ($NetOutput) {
+        $ValueString = $NetOutput.ToString() -replace "[^0-9]", ""
+        
+        if ([string]::IsNullOrWhiteSpace($ValueString)) {
+            $CurrentValue = 0 
+        } else {
+            $CurrentValue = [int]$ValueString
+        }
+    } else {
+        throw "Could not parse 'net accounts' output."
+    }
+} catch {
+    $CurrentValue = $null
+    Write-Host "[!] Error retrieving policy: $_" -ForegroundColor Red
+}
+
+# Check Logic
+if ($null -eq $CurrentValue) {
+    Write-Host "[!] Unable to determine current value." -ForegroundColor Red
+    $Status = "NON-COMPLIANT"
+}
+elseif ($CurrentValue -ge $DesiredValue) {
+    Write-Host "Value is correct ($CurrentValue). No action needed." -ForegroundColor Green
+    $Status = "COMPLIANT"
+}
+else {
+    Write-Host "Value is incorrect ($CurrentValue). Expected: $DesiredValue or more" -ForegroundColor Red
+    $Status = "NON-COMPLIANT"
+}
+
+Write-Host "=============================================================="
+Write-Host "Audit completed at $(Get-Date)"
+Write-Host "Status: $Status"
+Write-Host "=============================================================="
+
+if ($Status -eq "COMPLIANT") { exit 0 } else { exit 1 }
