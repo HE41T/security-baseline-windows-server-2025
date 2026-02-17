@@ -1,18 +1,18 @@
 # ==============================================================
-# CIS Check: 18.1.1.2 (L1) - Remediation Script
-# Description: Ensure 'Prevent enabling lock screen slide show' is set to 'Enabled'
+# CIS Check: 18.4.2 (L1) - Remediation Script
+# Description: Ensure 'Configure SMB v1 client driver' is set to 'Enabled: Disable driver'
 # ==============================================================
 
-$LogFile = "C:\Windows\Temp\remediate_18.1.1.2.log"
+$LogFile = "C:\Windows\Temp\remediate_18.4.2.log"
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$DesiredValue = 1
-$RegPath = "HKLM:\Software\Policies\Microsoft\Windows\Personalization"
-$RegName = "NoLockScreenSlideshow"
+$DesiredValue = 4
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Services\mrxsmb10"
+$RegName = "Start"
 
 $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="
 Write-Host $StartMsg
-Write-Host "Control 18.1.1.2: Ensure 'Prevent enabling lock screen slide show' is Enabled ($DesiredValue)"
+Write-Host "Control 18.4.2: Ensure SMB v1 client driver is Disabled ($DesiredValue)"
 Write-Host "=============================================================="
 
 Add-Content -Path $LogFile -Value "`n=============================================================="
@@ -35,11 +35,21 @@ if ($CurrentValue -eq -1 -or $CurrentValue -ne $DesiredValue) {
     
     try {
         if (!(Test-Path $RegPath)) { New-Item -Path $RegPath -Force | Out-Null }
+        
+        # 1. แก้ไขใน Registry
         Set-ItemProperty -Path $RegPath -Name $RegName -Value $DesiredValue -Type DWord -Force
         
+        # 2. ปิด Windows Feature เพิ่มเติม (เพื่อความชัวร์)
+        $Feat = Get-WindowsOptionalFeature -Online -FeatureName "SMB1Protocol"
+        if ($Feat.State -ne "Disabled") {
+            Disable-WindowsOptionalFeature -Online -FeatureName "SMB1Protocol" -NoRestart | Out-Null
+            Add-Content -Path $LogFile -Value "Disabled SMB1Protocol Feature."
+        }
+
+        # ตรวจสอบซ้ำ (Verify Registry)
         $NewValue = Get-RegistryValue
         if ($NewValue -eq $DesiredValue) {
-            $ResultMsg = "Fixed. New value is $NewValue."
+            $ResultMsg = "Fixed. New value is $NewValue (Reboot Required)."
             Write-Host $ResultMsg -ForegroundColor Green
             Add-Content -Path $LogFile -Value $ResultMsg
             $Status = "COMPLIANT"

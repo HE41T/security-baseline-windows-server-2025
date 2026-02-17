@@ -1,16 +1,16 @@
 # ==============================================================
-# CIS Check: 18.1.1.2 (L1) - Audit Script
-# Description: Ensure 'Prevent enabling lock screen slide show' is set to 'Enabled'
+# CIS Check: 18.5.2 (L1) - Audit Script
+# Description: Ensure 'DisableIPSourceRouting IPv6' is set to 'Highest protection'
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$DesiredValue = 1
-$RegPath = "HKLM:\Software\Policies\Microsoft\Windows\Personalization"
-$RegName = "NoLockScreenSlideshow"
+$DesiredValue = 2 # 2 = Highest protection
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters"
+$RegName = "DisableIPSourceRouting"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 18.1.1.2: Ensure 'Prevent enabling lock screen slide show' is Enabled ($DesiredValue)"
+Write-Host "Control 18.5.2: Ensure IPv6 Source Routing is Disabled ($DesiredValue)"
 Write-Host "=============================================================="
 
 try {

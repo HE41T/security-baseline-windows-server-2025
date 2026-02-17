@@ -1,16 +1,16 @@
 # ==============================================================
-# CIS Check: 18.1.1.2 (L1) - Audit Script
-# Description: Ensure 'Prevent enabling lock screen slide show' is set to 'Enabled'
+# CIS Check: 18.4.7 (L1) - Audit Script
+# Description: Ensure 'WDigest Authentication' is set to 'Disabled'
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$DesiredValue = 1
-$RegPath = "HKLM:\Software\Policies\Microsoft\Windows\Personalization"
-$RegName = "NoLockScreenSlideshow"
+$DesiredValue = 0 # 0 = Disabled
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest"
+$RegName = "UseLogonCredential"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 18.1.1.2: Ensure 'Prevent enabling lock screen slide show' is Enabled ($DesiredValue)"
+Write-Host "Control 18.4.7: Ensure WDigest Authentication is Disabled ($DesiredValue)"
 Write-Host "=============================================================="
 
 try {

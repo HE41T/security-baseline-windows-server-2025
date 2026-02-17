@@ -1,18 +1,18 @@
 # ==============================================================
-# CIS Check: 18.1.1.2 (L1) - Remediation Script
-# Description: Ensure 'Prevent enabling lock screen slide show' is set to 'Enabled'
+# CIS Check: 18.4.1 (L1) - Remediation Script
+# Description: Ensure 'Apply UAC restrictions to local accounts on network logons' is 'Enabled'
 # ==============================================================
 
-$LogFile = "C:\Windows\Temp\remediate_18.1.1.2.log"
+$LogFile = "C:\Windows\Temp\remediate_18.4.1.log"
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$DesiredValue = 1
-$RegPath = "HKLM:\Software\Policies\Microsoft\Windows\Personalization"
-$RegName = "NoLockScreenSlideshow"
+$DesiredValue = 0
+$RegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+$RegName = "LocalAccountTokenFilterPolicy"
 
 $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="
 Write-Host $StartMsg
-Write-Host "Control 18.1.1.2: Ensure 'Prevent enabling lock screen slide show' is Enabled ($DesiredValue)"
+Write-Host "Control 18.4.1: Ensure UAC restrictions are Enabled ($DesiredValue)"
 Write-Host "=============================================================="
 
 Add-Content -Path $LogFile -Value "`n=============================================================="

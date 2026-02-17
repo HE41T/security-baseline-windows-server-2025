@@ -1,16 +1,16 @@
 # ==============================================================
-# CIS Check: 18.1.1.2 (L1) - Audit Script
-# Description: Ensure 'Prevent enabling lock screen slide show' is set to 'Enabled'
+# CIS Check: 18.4.6 (L1) - Audit Script
+# Description: Ensure 'NetBT NodeType configuration' is set to 'P-node'
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$DesiredValue = 1
-$RegPath = "HKLM:\Software\Policies\Microsoft\Windows\Personalization"
-$RegName = "NoLockScreenSlideshow"
+$DesiredValue = 2 # 2 = P-node
+$RegPath = "HKLM:\System\CurrentControlSet\Services\NetBT\Parameters"
+$RegName = "NodeType"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 18.1.1.2: Ensure 'Prevent enabling lock screen slide show' is Enabled ($DesiredValue)"
+Write-Host "Control 18.4.6: Ensure NetBT NodeType is P-node ($DesiredValue)"
 Write-Host "=============================================================="
 
 try {

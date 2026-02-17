@@ -1,18 +1,18 @@
 # ==============================================================
-# CIS Check: 18.1.1.2 (L1) - Remediation Script
-# Description: Ensure 'Prevent enabling lock screen slide show' is set to 'Enabled'
+# CIS Check: 18.5.2 (L1) - Remediation Script
+# Description: Ensure 'DisableIPSourceRouting IPv6' is set to 'Highest protection'
 # ==============================================================
 
-$LogFile = "C:\Windows\Temp\remediate_18.1.1.2.log"
+$LogFile = "C:\Windows\Temp\remediate_18.5.2.log"
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$DesiredValue = 1
-$RegPath = "HKLM:\Software\Policies\Microsoft\Windows\Personalization"
-$RegName = "NoLockScreenSlideshow"
+$DesiredValue = 2
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip6\Parameters"
+$RegName = "DisableIPSourceRouting"
 
 $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="
 Write-Host $StartMsg
-Write-Host "Control 18.1.1.2: Ensure 'Prevent enabling lock screen slide show' is Enabled ($DesiredValue)"
+Write-Host "Control 18.5.2: Ensure IPv6 Source Routing is Disabled ($DesiredValue)"
 Write-Host "=============================================================="
 
 Add-Content -Path $LogFile -Value "`n=============================================================="

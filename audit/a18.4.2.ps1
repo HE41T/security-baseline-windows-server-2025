@@ -1,16 +1,16 @@
 # ==============================================================
-# CIS Check: 18.1.1.2 (L1) - Audit Script
-# Description: Ensure 'Prevent enabling lock screen slide show' is set to 'Enabled'
+# CIS Check: 18.4.2 (L1) - Audit Script
+# Description: Ensure 'Configure SMB v1 client driver' is set to 'Enabled: Disable driver'
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$DesiredValue = 1
-$RegPath = "HKLM:\Software\Policies\Microsoft\Windows\Personalization"
-$RegName = "NoLockScreenSlideshow"
+$DesiredValue = 4 # 4 = Disabled
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Services\mrxsmb10"
+$RegName = "Start"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 18.1.1.2: Ensure 'Prevent enabling lock screen slide show' is Enabled ($DesiredValue)"
+Write-Host "Control 18.4.2: Ensure SMB v1 client driver is Disabled ($DesiredValue)"
 Write-Host "=============================================================="
 
 try {

@@ -1,18 +1,18 @@
 # ==============================================================
-# CIS Check: 18.1.1.2 (L1) - Remediation Script
-# Description: Ensure 'Prevent enabling lock screen slide show' is set to 'Enabled'
+# CIS Check: 18.4.4 (L1) - Remediation Script
+# Description: Ensure 'Enable Certificate Padding' is set to 'Enabled'
 # ==============================================================
 
-$LogFile = "C:\Windows\Temp\remediate_18.1.1.2.log"
+$LogFile = "C:\Windows\Temp\remediate_18.4.4.log"
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$DesiredValue = 1
-$RegPath = "HKLM:\Software\Policies\Microsoft\Windows\Personalization"
-$RegName = "NoLockScreenSlideshow"
+$DesiredValue = "1"
+$RegPath = "HKLM:\Software\Microsoft\Cryptography\Wintrust\Config"
+$RegName = "EnableCertPaddingCheck"
 
 $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="
 Write-Host $StartMsg
-Write-Host "Control 18.1.1.2: Ensure 'Prevent enabling lock screen slide show' is Enabled ($DesiredValue)"
+Write-Host "Control 18.4.4: Ensure Certificate Padding is Enabled ($DesiredValue)"
 Write-Host "=============================================================="
 
 Add-Content -Path $LogFile -Value "`n=============================================================="
@@ -21,21 +21,25 @@ Add-Content -Path $LogFile -Value "$StartMsg"
 function Get-RegistryValue {
     try {
         $RegData = Get-ItemProperty -Path $RegPath -Name $RegName -ErrorAction SilentlyContinue
-        if ($RegData -and $RegData.$RegName -ne $null) { return [int]$RegData.$RegName }
-        return -1
-    } catch { return -1 }
+        if ($RegData -and $RegData.$RegName -ne $null) {
+            return [string]$RegData.$RegName
+        }
+        return "-1"
+    } catch { return "-1" }
 }
 
 $CurrentValue = Get-RegistryValue
 
-if ($CurrentValue -eq -1 -or $CurrentValue -ne $DesiredValue) {
+if ($CurrentValue -eq "-1" -or $CurrentValue -ne $DesiredValue) {
     $Msg = "Value is incorrect or missing ($CurrentValue). Fixing..."
     Write-Host $Msg -ForegroundColor Yellow
     Add-Content -Path $LogFile -Value $Msg
     
     try {
         if (!(Test-Path $RegPath)) { New-Item -Path $RegPath -Force | Out-Null }
-        Set-ItemProperty -Path $RegPath -Name $RegName -Value $DesiredValue -Type DWord -Force
+        
+        # Key นี้ใช้ Type String
+        Set-ItemProperty -Path $RegPath -Name $RegName -Value $DesiredValue -Type String -Force
         
         $NewValue = Get-RegistryValue
         if ($NewValue -eq $DesiredValue) {

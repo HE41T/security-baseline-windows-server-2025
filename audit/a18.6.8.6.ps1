@@ -1,23 +1,23 @@
-# ==============================================================
-# CIS Check: 18.1.1.2 (L1) - Audit Script
-# Description: Ensure 'Prevent enabling lock screen slide show' is set to 'Enabled'
+﻿# ==============================================================
+# CIS Check: 18.6.8.6 (L1) - Audit Script
+# Description: Ensure 18.6.8.6 MinSMB2Dialect is set to 785
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$DesiredValue = 1
-$RegPath = "HKLM:\Software\Policies\Microsoft\Windows\Personalization"
-$RegName = "NoLockScreenSlideshow"
+$DesiredValue = 785
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters"
+$RegName = "MinSMB2Dialect"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 18.1.1.2: Ensure 'Prevent enabling lock screen slide show' is Enabled ($DesiredValue)"
+Write-Host "Control 18.6.8.6: $RegName must be $DesiredValue"
 Write-Host "=============================================================="
 
 try {
     $RegData = Get-ItemProperty -Path $RegPath -Name $RegName -ErrorAction SilentlyContinue
     if ($RegData -and $RegData.$RegName -ne $null) {
-        $CurrentValue = [int]$RegData.$RegName
-    } else { $CurrentValue = -1 }
+        $CurrentValue = $RegData.$RegName
+    } else { $CurrentValue =  }
 } catch {
     $CurrentValue = $null
     Write-Host "[!] Error retrieving policy: $_" -ForegroundColor Red
@@ -32,7 +32,7 @@ elseif ($CurrentValue -eq $DesiredValue) {
     $Status = "COMPLIANT"
 }
 else {
-    $ShowVal = if ($CurrentValue -eq -1) { "Not Configured" } else { $CurrentValue }
+    $ShowVal = if ($CurrentValue -eq $null) { "Not Configured" } else { $CurrentValue }
     Write-Host "Value is incorrect ($ShowVal). Expected: $DesiredValue" -ForegroundColor Red
     $Status = "NON-COMPLIANT"
 }

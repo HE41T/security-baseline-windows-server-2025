@@ -55,10 +55,6 @@ CIS_TASKS = [
     {"id": "2.3.17.2", "enabled": True, "desc": "Ensure 'User Account Control: Behavior of the elevation prompt for administrators' is set to 'Prompt for consent on the secure desktop' or higher (Automated)"},
     {"id": "2.3.17.3", "enabled": True, "desc": "Ensure 'User Account Control: Behavior of the elevation prompt for standard users' is set to 'Automatically deny elevation requests' (Automated)"},
     
-    # Section 5
-    {"id": "5.1", "enabled": True, "desc": "Ensure 'Print Spooler (Spooler)' is set to 'Disabled' (DC only)"},
-    {"id": "5.2", "enabled": True, "desc": "Ensure 'Print Spooler (Spooler)' is set to 'Disabled' (MS only)"},
-    
     # Section 9
     {"id": "9.1.1", "enabled": True, "desc": "Ensure 'Windows Firewall: Domain: Firewall state' is set to 'On (recommended)' (Automated)"},
     {"id": "9.1.2", "enabled": True, "desc": "Ensure 'Windows Firewall: Domain: Inbound connections' is set to 'Block (default)' (Automated)"},
