@@ -3,7 +3,6 @@
 # Description: Ensure 'Prevent enabling lock screen camera' is set to 'Enabled'
 # ==============================================================
 
-$LogFile = "C:\Windows\Temp\remediate_lock_screen_camera.log"
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $RegPath = "HKLM:\Software\Policies\Microsoft\Windows\Personalization"
 $Name = "NoLockScreenCamera"
@@ -13,7 +12,6 @@ Write-Host "=============================================================="
 Write-Host "Remediation started: $Date"
 Write-Host "Control 18.1.1.1: Set $Name to $DesiredValue"
 Write-Host "=============================================================="
-Add-Content -Path $LogFile -Value "`n==============================================================`nRemediation started: $Date"
 
 try {
     # ตรวจสอบค่าก่อนแก้ไข
@@ -22,7 +20,6 @@ try {
     if ($CurrentValue -eq $DesiredValue) {
         $Msg = "Value is already correct ($CurrentValue). No action needed."
         Write-Host $Msg -ForegroundColor Green
-        Add-Content -Path $LogFile -Value $Msg
         $Status = "COMPLIANT"
     } else {
         Write-Host "Value is incorrect or missing. Fixing..." -ForegroundColor Yellow
@@ -41,7 +38,6 @@ try {
 } catch {
     $Msg = "Failed to fix: $_"
     Write-Host $Msg -ForegroundColor Red
-    Add-Content -Path $LogFile -Value $Msg
     $Status = "NON-COMPLIANT"
 }
 
