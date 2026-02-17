@@ -159,8 +159,8 @@ class CISAutomation:
     
     def exec_remote_script(self, local_path):
         """รันสคริปต์บนเครื่องปลายทาง"""
-        remote_temp = "C:/Users/natagon.sir/Desktop/cis_temp_exec.ps1"
-        
+        remote_temp = "C:/Windows/Temp/cis_temp_exec.ps1"
+
         if not os.path.exists(local_path):
             self.log(f"ERROR: File not found: {local_path}")
             return 404, f"Local file not found: {local_path}"
