@@ -17,7 +17,7 @@ try {
     $RegData = Get-ItemProperty -Path $RegPath -Name $RegName -ErrorAction SilentlyContinue
     if ($RegData -and $RegData.$RegName -ne $null) {
         $CurrentValue = $RegData.$RegName
-    } else { $CurrentValue =  }
+    } else { $CurrentValue = $null }
 } catch {
     $CurrentValue = $null
     Write-Host "[!] Error retrieving policy: $_" -ForegroundColor Red
