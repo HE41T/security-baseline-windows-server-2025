@@ -1,58 +1,82 @@
 # ==============================================================
 # CIS Check: 2.2.3 (L1) - Audit Script
-# Description: Access this computer from the network
+# Description: Ensure 'Access this computer from the network' is set to 'Administrators, Authenticated Users'
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$DesiredValue = "*S-1-5-32-544,*S-1-5-11"
+# SID ที่ถูกต้องตาม CIS (Member Servers):
+# *S-1-5-32-544 = Administrators
+# *S-1-5-11     = Authenticated Users
+$DesiredSIDs = @("*S-1-5-32-544", "*S-1-5-11") 
+$DesiredNames = "Administrators, Authenticated Users"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 2.2.3: Access this computer from the network"
+Write-Host "Control 2.2.3: Ensure 'Access this computer from the network' is set correctly"
+Write-Host "Expected: $DesiredNames"
 Write-Host "=============================================================="
 
-
-$Privilege = "SeNetworkLogonRight"
-$TempFile = [System.IO.Path]::GetTempFileName()
+$SecEditExport = "$env:TEMP\secpol_audit_2.2.3.inf"
 
 try {
-    # Export current rights
-    secedit /export /cfg $TempFile /areas USER_RIGHTS | Out-Null
-    
-    # Parse file
-    $Content = Get-Content $TempFile
-    $Line = $Content | Select-String -Pattern "^$Privilege\s*="
-    
-    if ($Line) {
-        $CurrentSetting = ($Line.ToString().Split("=")[1]).Trim()
+    # 1. Export Security Policy ปัจจุบันไปยัง Temp file
+    # /quiet เพื่อไม่ให้แสดง popup, /areas USER_RIGHTS เพื่อดึงเฉพาะสิทธิ์ผู้ใช้
+    Start-Process -FilePath "secedit.exe" -ArgumentList "/export /cfg `"$SecEditExport`" /areas USER_RIGHTS" -Wait -NoNewWindow
+
+    # 2. อ่านไฟล์และหาค่า SeNetworkLogonRight
+    if (Test-Path $SecEditExport) {
+        $Content = Get-Content $SecEditExport
+        # ค้นหาบรรทัดที่ขึ้นต้นด้วย SeNetworkLogonRight
+        $Line = $Content | Select-String -Pattern "^SeNetworkLogonRight\s*="
+        
+        if ($Line) {
+            # ดึงค่าหลังเครื่องหมาย = และตัดช่องว่าง
+            $RawValue = ($Line.ToString() -split "=")[1].Trim()
+            
+            # แยกค่าด้วยคอมมา (,) กรณีมีหลาย user/group
+            $CurrentSIDs = $RawValue -split "," | ForEach-Object { $_.Trim() }
+        } else {
+            # กรณีไม่มีบรรทัดนี้ แสดงว่าไม่มีใครได้รับสิทธิ์นี้เลย (Empty)
+            $CurrentSIDs = @()
+        }
     } else {
-        $CurrentSetting = ""
-    }
-    
-    Write-Host "Current Setting for $Privilege: $CurrentSetting"
-    
-    # Simple check: Does it contain expected parts? (Complex logic simplified for template)
-    # Note: CIS requires specific SIDs. This audit logs the current value for review.
-    # Strict checking usually requires parsing SIDs.
-    
-    if ([string]::IsNullOrWhiteSpace($CurrentSetting)) {
-        Write-Host "Value is empty. Review manually if this is intended (e.g. No One)." -ForegroundColor Yellow
-        $Status = "WARNING_CHECK_MANUAL" 
-    } else {
-        # Check logic handled in specific scripts usually, but here we assume if matches desc roughly
-        Write-Host "Value found. Please verify against: *S-1-5-32-544,*S-1-5-11" -ForegroundColor Cyan
-        $Status = "COMPLIANT" # Placeholder, strict check requires splitting strings
+        throw "Failed to export security policy."
     }
 
+    # Clean up temp file
+    if (Test-Path $SecEditExport) { Remove-Item $SecEditExport -Force }
+
 } catch {
-    Write-Host "[!] Error: $_" -ForegroundColor Red
+    $CurrentSIDs = $null
+    Write-Host "[!] Error retrieving policy: $_" -ForegroundColor Red
+}
+
+# 3. เริ่มตรวจสอบเงื่อนไข (Compare Arrays)
+# เรียงลำดับเพื่อให้เปรียบเทียบได้ถูกต้อง
+$SortedCurrent = $CurrentSIDs | Sort-Object
+$SortedDesired = $DesiredSIDs | Sort-Object
+$CurrentString = $SortedCurrent -join ", "
+
+if ($null -eq $CurrentSIDs) {
+    Write-Host "[!] Unable to determine current value." -ForegroundColor Red
     $Status = "NON-COMPLIANT"
-} finally {
-    if (Test-Path $TempFile) { Remove-Item $TempFile }
+}
+elseif (($SortedCurrent -join ",") -eq ($SortedDesired -join ",")) {
+    # ต้องตรงกันเป๊ะๆ ห้ามมี Everyone หรือ Users อื่นปน
+    Write-Host "Value is correct." -ForegroundColor Green
+    Write-Host "Current SIDs: $CurrentString" -ForegroundColor Green
+    $Status = "COMPLIANT"
+}
+else {
+    Write-Host "Value is incorrect." -ForegroundColor Red
+    Write-Host "Current SIDs : $CurrentString" -ForegroundColor Yellow
+    Write-Host "Expected SIDs: $($SortedDesired -join ", ")" -ForegroundColor Yellow
+    $Status = "NON-COMPLIANT"
 }
 
 Write-Host "=============================================================="
-Write-Host "Action completed at $(Get-Date)"
+Write-Host "Audit completed at $(Get-Date)"
 Write-Host "Status: $Status"
 Write-Host "=============================================================="
+
 if ($Status -eq "COMPLIANT") { exit 0 } else { exit 1 }

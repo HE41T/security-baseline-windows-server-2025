@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 2.2.8 (L1) - Remediation Script
-# Description: Allow log on locally
+# Description: Ensure 'Allow log on locally' is set to 'Administrators'
 # ==============================================================
 
 $LogFile = "C:\Windows\Temp\remediate_2_2_8.log"
@@ -10,12 +10,13 @@ $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="
 Write-Host $StartMsg
 Write-Host "Control 2.2.8: Allow log on locally"
+Write-Host "Required Value: Administrators (*S-1-5-32-544)"
 Write-Host "=============================================================="
 
 Add-Content -Path $LogFile -Value "`n=============================================================="
 Add-Content -Path $LogFile -Value "$StartMsg"
 
-
+# Required SID: Administrators
 $Privilege = "SeInteractiveLogonRight"
 $Sids = "*S-1-5-32-544"
 $InfFile = "C:\Windows\Temp\remediate_ur.inf"

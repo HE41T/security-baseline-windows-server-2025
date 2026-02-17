@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 2.2.22 (L1) - Remediation Script
-# Description: Deny access to this computer from the network
+# Description: Ensure 'Deny access to this computer from the network' includes Guests and Local account/Admins
 # ==============================================================
 
 $LogFile = "C:\Windows\Temp\remediate_2_2_22.log"
@@ -10,12 +10,13 @@ $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="
 Write-Host $StartMsg
 Write-Host "Control 2.2.22: Deny access to this computer from the network"
+Write-Host "Required Values: Guests (*S-1-5-32-546), Local account and member of Administrators group (*S-1-5-113)"
 Write-Host "=============================================================="
 
 Add-Content -Path $LogFile -Value "`n=============================================================="
 Add-Content -Path $LogFile -Value "$StartMsg"
 
-
+# Required SIDs: Guests (*S-1-5-32-546), Local account and member of Administrators group (*S-1-5-113)
 $Privilege = "SeDenyNetworkLogonRight"
 $Sids = "*S-1-5-32-546,*S-1-5-113"
 $InfFile = "C:\Windows\Temp\remediate_ur.inf"

@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 2.2.23 (L1) - Remediation Script
-# Description: Deny log on as a batch job
+# Description: Ensure 'Deny log on as a batch job' includes Guests
 # ==============================================================
 
 $LogFile = "C:\Windows\Temp\remediate_2_2_23.log"
@@ -10,12 +10,13 @@ $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="
 Write-Host $StartMsg
 Write-Host "Control 2.2.23: Deny log on as a batch job"
+Write-Host "Required Value: Guests (*S-1-5-32-546)"
 Write-Host "=============================================================="
 
 Add-Content -Path $LogFile -Value "`n=============================================================="
 Add-Content -Path $LogFile -Value "$StartMsg"
 
-
+# Required SID: Guests (*S-1-5-32-546)
 $Privilege = "SeDenyBatchLogonRight"
 $Sids = "*S-1-5-32-546"
 $InfFile = "C:\Windows\Temp\remediate_ur.inf"
