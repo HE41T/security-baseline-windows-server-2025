@@ -55,10 +55,6 @@ CIS_TASKS = [
     {"id": "2.3.17.2", "enabled": True, "desc": "Ensure 'User Account Control: Behavior of the elevation prompt for administrators' is set to 'Prompt for consent on the secure desktop' or higher (Automated)"},
     {"id": "2.3.17.3", "enabled": True, "desc": "Ensure 'User Account Control: Behavior of the elevation prompt for standard users' is set to 'Automatically deny elevation requests' (Automated)"},
     
-    # Section 5
-    {"id": "5.1", "enabled": True, "desc": "Ensure 'Print Spooler (Spooler)' is set to 'Disabled' (DC only)"},
-    {"id": "5.2", "enabled": True, "desc": "Ensure 'Print Spooler (Spooler)' is set to 'Disabled' (MS only)"},
-    
     # Section 9
     {"id": "9.1.1", "enabled": True, "desc": "Ensure 'Windows Firewall: Domain: Firewall state' is set to 'On (recommended)' (Automated)"},
     {"id": "9.1.2", "enabled": True, "desc": "Ensure 'Windows Firewall: Domain: Inbound connections' is set to 'Block (default)' (Automated)"},
@@ -201,6 +197,7 @@ CIS_TASKS = [
     {"id": "18.10.8.1", "enabled": True, "desc": "Ensure 'Disallow Autoplay for non-volume devices' is set to 'Enabled' (Automated)"},
     {"id": "18.10.8.2", "enabled": True, "desc": "Ensure 'Set the default behavior for AutoRun' is set to 'Enabled: Do not execute any autorun commands' (Automated)"},
     {"id": "18.10.8.3", "enabled": True, "desc": "Ensure 'Turn off Autoplay' is set to 'Enabled: All drives' (Automated)"},
+
     {"id": "18.10.9.1.1", "enabled": True, "desc": "Ensure 'Configure enhanced anti-spoofing' is set to 'Enabled' (Automated)"},
     {"id": "18.10.13.1", "enabled": True, "desc": "Ensure 'Turn off cloud consumer account state content' is set to 'Enabled' (Automated)"},
     {"id": "18.10.13.3", "enabled": True, "desc": "Ensure 'Turn off Microsoft consumer experiences' is set to 'Enabled' (Automated)"},
