@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 17.5.1 (L1) - Audit Script
-# Description: Audit Account Lockout
+# Description: Ensure 'Audit Account Lockout' is set to include 'Failure' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

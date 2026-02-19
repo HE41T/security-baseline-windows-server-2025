@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 2.3.7.8 (L1) - Audit Script
-# Description: Require Domain Controller Authentication to unlock
+# Description: Ensure 'Interactive logon: Require Domain Controller Authentication to unlock workstation' is set to 'Enabled' (MS only) (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

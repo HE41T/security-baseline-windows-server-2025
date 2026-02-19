@@ -1,9 +1,8 @@
 # ==============================================================
 # CIS Check: 2.3.7.9 (L1) - Remediation Script
-# Description: Smart card removal behavior
+# Description: Ensure 'Interactive logon: Smart card removal behavior' is set to 'Lock Workstation' or higher (Automated)
 # ==============================================================
 
-$LogFile = "C:\Windows\Temp\remediate_2_3_7_9.log"
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
 $StartMsg = "Remediation started: $Date"
@@ -12,8 +11,6 @@ Write-Host $StartMsg
 Write-Host "Control 2.3.7.9: Smart card removal behavior"
 Write-Host "=============================================================="
 
-Add-Content -Path $LogFile -Value "`n=============================================================="
-Add-Content -Path $LogFile -Value "$StartMsg"
 
 
 try {
@@ -30,25 +27,20 @@ try {
     if ($NewVal -eq $TargetValue) {
         $Msg = "Fixed. Set $RegName to $NewVal"
         Write-Host $Msg -ForegroundColor Green
-        Add-Content -Path $LogFile -Value $Msg
-        $Status = "COMPLIANT"
+                $Status = "COMPLIANT"
     } else {
         $Msg = "Failed to set registry value."
         Write-Host $Msg -ForegroundColor Red
-        Add-Content -Path $LogFile -Value $Msg
-        $Status = "NON-COMPLIANT"
+                $Status = "NON-COMPLIANT"
     }
 } catch {
     $Msg = "Error: $_"
     Write-Host $Msg -ForegroundColor Red
-    Add-Content -Path $LogFile -Value $Msg
-    $Status = "NON-COMPLIANT"
+        $Status = "NON-COMPLIANT"
 }
 
 Write-Host "=============================================================="
 Write-Host "Remediation completed at $(Get-Date)"
 Write-Host "Final Status: $Status"
 Write-Host "=============================================================="
-Add-Content -Path $LogFile -Value "Final Status: $Status"
-Add-Content -Path $LogFile -Value "=============================================================="
 if ($Status -eq "COMPLIANT") { exit 0 } else { exit 1 }

@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 17.5.2 (L1) - Audit Script
-# Description: Audit Group Membership
+# Description: Ensure 'Audit Group Membership' is set to include 'Success' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

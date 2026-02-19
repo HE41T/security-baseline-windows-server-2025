@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 2.2.8 (L1) - Audit Script (Fixed Encoding & Null Check)
-# Description: Ensure 'Allow log on locally' is set to 'Administrators'
+# Description: Ensure 'Allow log on locally' is set to 'Administrators' (MS only) (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
@@ -9,7 +9,7 @@ $DesiredSids = @("S-1-5-32-544")
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 2.2.8: Allow log on locally"
+Write-Host "Control 2.2.8: Ensure 'Allow log on locally' is set to 'Administrators' (MS only) (Automated)"
 Write-Host "=============================================================="
 
 $Privilege = "SeInteractiveLogonRight"

@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 17.2.1 (L1) - Audit Script
-# Description: Audit Application Group Management
+# Description: Ensure 'Audit Application Group Management' is set to 'Success and Failure' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

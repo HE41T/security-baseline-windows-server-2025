@@ -1,9 +1,8 @@
 # ==============================================================
 # CIS Check: 9.2.3 (L1) - Remediation Script
-# Description: FW Private: Notify
+# Description: Ensure 'Windows Firewall: Private: Settings: Display a notification' is set to 'No' (Automated)
 # ==============================================================
 
-$LogFile = "C:\Windows\Temp\remediate_9_2_3.log"
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
 $StartMsg = "Remediation started: $Date"
@@ -12,8 +11,6 @@ Write-Host $StartMsg
 Write-Host "Control 9.2.3: FW Private: Notify"
 Write-Host "=============================================================="
 
-Add-Content -Path $LogFile -Value "`n=============================================================="
-Add-Content -Path $LogFile -Value "$StartMsg"
 
 
 try {
@@ -21,8 +18,7 @@ try {
     Set-NetFirewallProfile -Profile $Profile -NotifyOnListen "False"
     $Msg = "Set Firewall $Profile NotifyOnListen to False"
     Write-Host $Msg -ForegroundColor Green
-    Add-Content -Path $LogFile -Value $Msg
-    $Status = "COMPLIANT"
+        $Status = "COMPLIANT"
 } catch {
     $Status = "NON-COMPLIANT"
 }
@@ -31,6 +27,4 @@ Write-Host "=============================================================="
 Write-Host "Remediation completed at $(Get-Date)"
 Write-Host "Final Status: $Status"
 Write-Host "=============================================================="
-Add-Content -Path $LogFile -Value "Final Status: $Status"
-Add-Content -Path $LogFile -Value "=============================================================="
 if ($Status -eq "COMPLIANT") { exit 0 } else { exit 1 }

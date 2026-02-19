@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 2.2.23 (L1) - Audit Script (Standardized)
-# Description: Ensure 'Deny log on as a batch job' includes Guests
+# Description: Ensure 'Deny log on as a batch job' to include 'Guests' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
@@ -9,7 +9,7 @@ $DesiredSids = @("S-1-5-32-546")
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 2.2.23: Deny log on as a batch job"
+Write-Host "Control 2.2.23: Ensure 'Deny log on as a batch job' to include 'Guests' (Automated)"
 Write-Host "=============================================================="
 
 $Privilege = "SeDenyBatchLogonRight"

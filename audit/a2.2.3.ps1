@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 2.2.3 (L1) - Audit Script
-# Description: Ensure 'Access this computer from the network' is set to 'Administrators, Authenticated Users'
+# Description: Ensure 'Access this computer from the network' is set to 'Administrators, Authenticated Users' (MS only) (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

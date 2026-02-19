@@ -1,9 +1,8 @@
 # ==============================================================
 # CIS Check: 2.2.11 (L1) - Remediation Script
-# Description: Ensure 'Back up files and directories' is set to 'Administrators'
+# Description: Ensure 'Back up files and directories' is set to 'Administrators' (Automated)
 # ==============================================================
 
-$LogFile = "C:\Windows\Temp\remediate_2_2_11.log"
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
 $StartMsg = "Remediation started: $Date"
@@ -13,8 +12,6 @@ Write-Host "Control 2.2.11: Back up files and directories"
 Write-Host "Required Value: Administrators (*S-1-5-32-544)"
 Write-Host "=============================================================="
 
-Add-Content -Path $LogFile -Value "`n=============================================================="
-Add-Content -Path $LogFile -Value "$StartMsg"
 
 # Required SID: Administrators
 $Privilege = "SeBackupPrivilege"
@@ -38,19 +35,15 @@ Revision=1
     
     $Msg = "Applied User Right: $Privilege = $Sids"
     Write-Host $Msg -ForegroundColor Green
-    Add-Content -Path $LogFile -Value $Msg
-    $Status = "COMPLIANT"
+        $Status = "COMPLIANT"
 } catch {
     $Msg = "Error: $_"
     Write-Host $Msg -ForegroundColor Red
-    Add-Content -Path $LogFile -Value $Msg
-    $Status = "NON-COMPLIANT"
+        $Status = "NON-COMPLIANT"
 }
 
 Write-Host "=============================================================="
 Write-Host "Remediation completed at $(Get-Date)"
 Write-Host "Final Status: $Status"
 Write-Host "=============================================================="
-Add-Content -Path $LogFile -Value "Final Status: $Status"
-Add-Content -Path $LogFile -Value "=============================================================="
 if ($Status -eq "COMPLIANT") { exit 0 } else { exit 1 }

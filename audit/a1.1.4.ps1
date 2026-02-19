@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 1.1.4 (L1) - Audit Script
-# Description: Ensure 'Minimum password length' is set to '14 or more character(s)'
+# Description: Ensure 'Minimum password length' is set to '14 or more character(s)' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

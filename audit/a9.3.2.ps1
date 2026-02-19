@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 9.3.2 (L1) - Audit Script
-# Description: FW Public: Inbound
+# Description: Ensure 'Windows Firewall: Public: Inbound connections' is set to 'Block (default)' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

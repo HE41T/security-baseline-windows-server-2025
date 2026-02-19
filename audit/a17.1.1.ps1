@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 17.1.1 (L1) - Audit Script
-# Description: Audit Credential Validation
+# Description: Ensure 'Audit Credential Validation' is set to 'Success and Failure' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

@@ -1,31 +1,36 @@
 # ==============================================================
 # CIS Check: 9.3.9 (L1) - Audit Script
-# Description: FW Public: Log Success
+# Description: Ensure 'Windows Firewall: Public: Logging: Log successful connections' is set to 'Yes' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$DesiredValue = "True"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 9.3.9: FW Public: Log Success"
+Write-Host "Control 9.3.9: FW Public: Log Success (Allowed Connections)"
 Write-Host "=============================================================="
 
-
 try {
-    $Profile = "Public"
-    $Prop = "LogAllowedConnections"
-    $Exp = "True"
+    $RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsFirewall\PublicProfile\Logging"
+    $RegName = "LogAllowedConnections"
+    $Exp = "1" # 1 = Yes
+
+    $Val = Get-ItemProperty -Path $RegPath -Name $RegName -ErrorAction SilentlyContinue
     
-    $Curr = Get-NetFirewallProfile -Profile $Profile | Select-Object -ExpandProperty $Prop
+    if ($Val) {
+        $Curr = $Val.$RegName.ToString()
+    } else {
+        $Curr = "Not Set"
+    }
     
-    if ("$Curr" -eq $Exp) {
-        Write-Host "$Profile $Prop is $Curr (Correct)" -ForegroundColor Green
+    if ($Curr -eq $Exp) {
+        Write-Host "Registry $RegName is $Curr (Correct)" -ForegroundColor Green
         $Status = "COMPLIANT"
     } else {
-        Write-Host "$Profile $Prop is $Curr (Expected: $Exp)" -ForegroundColor Red
+        Write-Host "Registry $RegName is $Curr (Expected: $Exp)" -ForegroundColor Red
         $Status = "NON-COMPLIANT"
     }
+
 } catch {
     $Status = "NON-COMPLIANT"
 }

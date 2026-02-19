@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 9.3.4 (L1) - Audit Script
-# Description: FW Public: Apply local rules
+# Description: Ensure 'Windows Firewall: Public: Settings: Apply local firewall rules' is set to 'No' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

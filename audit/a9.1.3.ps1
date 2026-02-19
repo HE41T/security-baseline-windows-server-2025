@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 9.1.3 (L1) - Audit Script
-# Description: FW Domain: Notify
+# Description: Ensure 'Windows Firewall: Domain: Settings: Display a notification' is set to 'No' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

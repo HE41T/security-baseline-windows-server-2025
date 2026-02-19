@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 2.3.7.2 (L1) - Audit Script
-# Description: Interactive logon: Don't display last signed-in
+# Description: Ensure 'Interactive logon: Don't display last signed-in' is set to 'Enabled' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
@@ -8,7 +8,7 @@ $DesiredValue = "1"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 2.3.7.2: Interactive logon: Don't display last signed-in"
+Write-Host "Control 2.3.7.2: Ensure 'Interactive logon: Don't display last signed-in' is set to 'Enabled' (Automated)"
 Write-Host "=============================================================="
 
 

@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 2.2.27 (L1) - Audit Script (Standardized)
-# Description: Ensure 'Deny log on through Remote Desktop Services' includes Guests & Local account
+# Description: Ensure 'Deny log on through Remote Desktop Services' is set to 'Guests, Local account' (MS only) (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
@@ -9,7 +9,7 @@ $DesiredSids = @("S-1-5-32-546", "S-1-5-113")
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 2.2.27: Deny log on through Remote Desktop Services"
+Write-Host "Control 2.2.27: Ensure 'Deny log on through Remote Desktop Services' is set to 'Guests, Local account' (MS only) (Automated)"
 Write-Host "=============================================================="
 
 $Privilege = "SeDenyRemoteInteractiveLogonRight"

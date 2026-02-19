@@ -1,9 +1,8 @@
 # ==============================================================
 # CIS Check: 1.1.4 (L1) - Remediation Script
-# Description: Ensure 'Minimum password length' is set to '14 or more character(s)'
+# Description: Ensure 'Minimum password length' is set to '14 or more character(s)' (Automated)
 # ==============================================================
 
-$LogFile = "C:\Windows\Temp\remediate_min_pw_len.log"
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 14
 
@@ -13,8 +12,6 @@ Write-Host $StartMsg
 Write-Host "Control 1.1.4: Ensure 'Minimum password length' is >= $DesiredValue"
 Write-Host "=============================================================="
 
-Add-Content -Path $LogFile -Value "`n=============================================================="
-Add-Content -Path $LogFile -Value "$StartMsg"
 
 function Get-MinPassLen {
     try {
@@ -35,14 +32,12 @@ $CurrentValue = Get-MinPassLen
 if ($CurrentValue -eq -1) {
     $Msg = "[!] Error: Could not read current password policy."
     Write-Host $Msg -ForegroundColor Red
-    Add-Content -Path $LogFile -Value $Msg
-    $Status = "NON-COMPLIANT"
+        $Status = "NON-COMPLIANT"
 }
 elseif ($CurrentValue -lt $DesiredValue) {
     $Msg = "Value is incorrect ($CurrentValue). Fixing..."
     Write-Host $Msg -ForegroundColor Yellow
-    Add-Content -Path $LogFile -Value $Msg
-    
+        
     try {
         # /minpwlen is the parameter
         $Proc = Start-Process "net.exe" -ArgumentList "accounts /minpwlen:$DesiredValue" -NoNewWindow -Wait -PassThru
@@ -53,13 +48,11 @@ elseif ($CurrentValue -lt $DesiredValue) {
             if ($NewValue -ge $DesiredValue) {
                 $ResultMsg = "Fixed. New value is $NewValue."
                 Write-Host $ResultMsg -ForegroundColor Green
-                Add-Content -Path $LogFile -Value $ResultMsg
-                $Status = "COMPLIANT"
+                                $Status = "COMPLIANT"
             } else {
                 $FailMsg = "Verification failed. Value remains $NewValue"
                 Write-Host $FailMsg -ForegroundColor Red
-                Add-Content -Path $LogFile -Value $FailMsg
-                $Status = "NON-COMPLIANT"
+                                $Status = "NON-COMPLIANT"
             }
         } else {
             throw "Net accounts command failed with exit code $($Proc.ExitCode)"
@@ -68,22 +61,18 @@ elseif ($CurrentValue -lt $DesiredValue) {
     } catch {
         $ErrorMsg = "Failed to fix: $_"
         Write-Host $ErrorMsg -ForegroundColor Red
-        Add-Content -Path $LogFile -Value $ErrorMsg
-        $Status = "NON-COMPLIANT"
+                $Status = "NON-COMPLIANT"
     }
 
 } else {
     $Msg = "Value is correct ($CurrentValue). No action needed."
     Write-Host $Msg -ForegroundColor Green
-    Add-Content -Path $LogFile -Value $Msg
-    $Status = "COMPLIANT"
+        $Status = "COMPLIANT"
 }
 
 Write-Host "=============================================================="
 Write-Host "Remediation completed at $(Get-Date)"
 Write-Host "Final Status: $Status"
 Write-Host "=============================================================="
-Add-Content -Path $LogFile -Value "Final Status: $Status"
-Add-Content -Path $LogFile -Value "=============================================================="
 
 if ($Status -eq "COMPLIANT") { exit 0 } else { exit 1 }

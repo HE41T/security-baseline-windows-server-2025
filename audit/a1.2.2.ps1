@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 1.2.2 (L1) - Audit Script
-# Description: Ensure 'Account lockout threshold' is '5 or fewer, but not 0'
+# Description: Ensure 'Account lockout threshold' is set to '5 or fewer invalid logon attempt(s), but not 0' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 17.3.2 (L1) - Audit Script
-# Description: Audit Process Creation
+# Description: Ensure 'Audit Process Creation' is set to include 'Success'
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
@@ -8,11 +8,11 @@ $DesiredValue = "Enabled"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 17.3.2: Audit Process Creation"
+Write-Host "Control 17.3.2: Ensure 'Audit Process Creation' is set to include 'Success'"
 Write-Host "=============================================================="
 
 
-$Subcat = "Process Creation"
+$Subcat = "{0cce922b-69ae-11d9-bed3-505054503030}"
 try {
     $Result = auditpol /get /subcategory:"$Subcat" /r | ConvertFrom-Csv
     if ($Result) {
