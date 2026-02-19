@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 9.2.3 (L1) - Audit Script
-# Description: FW Private: Notify
+# Description: Ensure 'Windows Firewall: Private: Settings: Display a notification' is set to 'No' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

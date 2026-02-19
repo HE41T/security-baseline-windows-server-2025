@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 9.2.1 (L1) - Audit Script
-# Description: FW Private: State
+# Description: Ensure 'Windows Firewall: Private: Firewall state' is set to 'On (recommended)' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 17.6.4 (L1) - Audit Script
-# Description: Audit Removable Storage
+# Description: Ensure 'Audit Removable Storage' is set to 'Success and Failure' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

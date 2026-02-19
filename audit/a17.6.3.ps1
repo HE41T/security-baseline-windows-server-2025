@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 17.6.3 (L1) - Audit Script
-# Description: Audit Other Object Access Events
+# Description: Ensure 'Audit Other Object Access Events' is set to 'Success and Failure' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

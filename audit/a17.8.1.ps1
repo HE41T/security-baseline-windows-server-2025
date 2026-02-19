@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 17.8.1 (L1) - Audit Script
-# Description: Audit Sensitive Privilege Use
+# Description: Ensure 'Audit Sensitive Privilege Use' is set to 'Success and Failure' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

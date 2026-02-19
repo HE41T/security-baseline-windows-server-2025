@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 9.1.4 (L1) - Audit Script
-# Description: FW Domain: Log Name
+# Description: Ensure 'Windows Firewall: Domain: Logging: Name' is set to '%SystemRoot%\\System32\\logfiles\\firewall\\domainfw.log' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

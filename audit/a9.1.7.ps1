@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 9.1.7 (L1) - Audit Script
-# Description: FW Domain: Log Successful Connections (Registry Check for Nessus)
+# Description: Ensure 'Windows Firewall: Domain: Logging: Log successful connections' is set to 'Yes' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

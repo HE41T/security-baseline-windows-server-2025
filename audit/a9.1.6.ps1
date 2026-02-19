@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 9.1.6 (L1) - Audit Script
-# Description: FW Domain: Log Dropped Packets (Registry Check for Nessus)
+# Description: Ensure 'Windows Firewall: Domain: Logging: Log dropped packets' is set to 'Yes' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

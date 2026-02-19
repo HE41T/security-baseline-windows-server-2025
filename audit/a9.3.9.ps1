@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 9.3.9 (L1) - Audit Script
-# Description: FW Public: Log Success (Registry Check)
+# Description: Ensure 'Windows Firewall: Public: Logging: Log successful connections' is set to 'Yes' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

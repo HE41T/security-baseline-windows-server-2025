@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 9.3.8 (L1) - Audit Script
-# Description: FW Public: Log Dropped Packets (Registry Check)
+# Description: Ensure 'Windows Firewall: Public: Logging: Log dropped packets' is set to 'Yes' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

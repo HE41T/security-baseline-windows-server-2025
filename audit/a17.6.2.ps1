@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 17.6.2 (L1) - Audit Script
-# Description: Audit File Share
+# Description: Ensure 'Audit File Share' is set to 'Success and Failure' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

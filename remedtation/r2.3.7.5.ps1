@@ -1,9 +1,8 @@
 # ==============================================================
 # CIS Check: 2.3.7.5 (L1) - Remediation Script
-# Description: Interactive logon: Message title for users attempting to log on
+# Description: Configure 'Interactive logon: Message title for users attempting to log on' (Automated)
 # ==============================================================
 
-$LogFile = "C:\Windows\Temp\remediate_2_3_7_5.log"
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = "Notice and Consent Banner"
 $RegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
@@ -16,8 +15,6 @@ Write-Host "Control 2.3.7.5: Interactive logon: Message title"
 Write-Host "Required Value: '$DesiredValue'"
 Write-Host "=============================================================="
 
-Add-Content -Path $LogFile -Value "`n=============================================================="
-Add-Content -Path $LogFile -Value "$StartMsg"
 
 try {
     if (-not (Test-Path $RegPath)) {
@@ -31,19 +28,16 @@ try {
     if ($Verify -eq $DesiredValue) {
         $Msg = "Success: Value set to '$Verify'"
         Write-Host $Msg -ForegroundColor Green
-        Add-Content -Path $LogFile -Value $Msg
-        $Status = "COMPLIANT"
+                $Status = "COMPLIANT"
     } else {
         $Msg = "Failed: Value read back as '$Verify'"
         Write-Host $Msg -ForegroundColor Red
-        Add-Content -Path $LogFile -Value $Msg
-        $Status = "NON-COMPLIANT"
+                $Status = "NON-COMPLIANT"
     }
 } catch {
     $Msg = "Error: $_"
     Write-Host $Msg -ForegroundColor Red
-    Add-Content -Path $LogFile -Value $Msg
-    $Status = "NON-COMPLIANT"
+        $Status = "NON-COMPLIANT"
 }
 
 Write-Host "=============================================================="

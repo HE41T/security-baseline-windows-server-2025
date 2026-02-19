@@ -1,9 +1,8 @@
 # ==============================================================
 # CIS Check: 17.5.1 (L1) - Remediation Script
-# Description: Audit Account Lockout
+# Description: Ensure 'Audit Account Lockout' is set to include 'Failure' (Automated)
 # ==============================================================
 
-$LogFile = "C:\Windows\Temp\remediate_17_5_1.log"
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
 $StartMsg = "Remediation started: $Date"
@@ -12,8 +11,6 @@ Write-Host $StartMsg
 Write-Host "Control 17.5.1: Audit Account Lockout"
 Write-Host "=============================================================="
 
-Add-Content -Path $LogFile -Value "`n=============================================================="
-Add-Content -Path $LogFile -Value "$StartMsg"
 
 
 $Subcat = "Account Lockout"
@@ -26,8 +23,7 @@ try {
     
     $Msg = "Set audit policy for $Subcat"
     Write-Host $Msg -ForegroundColor Green
-    Add-Content -Path $LogFile -Value $Msg
-    $Status = "COMPLIANT"
+        $Status = "COMPLIANT"
 } catch {
     $Status = "NON-COMPLIANT"
 }
@@ -36,6 +32,4 @@ Write-Host "=============================================================="
 Write-Host "Remediation completed at $(Get-Date)"
 Write-Host "Final Status: $Status"
 Write-Host "=============================================================="
-Add-Content -Path $LogFile -Value "Final Status: $Status"
-Add-Content -Path $LogFile -Value "=============================================================="
 if ($Status -eq "COMPLIANT") { exit 0 } else { exit 1 }

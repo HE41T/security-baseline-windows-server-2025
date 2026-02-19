@@ -1,9 +1,8 @@
 # ==============================================================
 # CIS Check: 2.2.3 (L1) - Remediation Script
-# Description: Ensure 'Access this computer from the network' is set to 'Administrators, Authenticated Users'
+# Description: Ensure 'Access this computer from the network' is set to 'Administrators, Authenticated Users' (MS only) (Automated)
 # ==============================================================
 
-$LogFile = "C:\Windows\Temp\remediate_network_access.log"
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
 # SID เป้าหมาย: Administrators, Authenticated Users
@@ -16,8 +15,6 @@ Write-Host $StartMsg
 Write-Host "Control 2.2.3: Ensure 'Access this computer from the network' is set correctly"
 Write-Host "=============================================================="
 
-Add-Content -Path $LogFile -Value "`n=============================================================="
-Add-Content -Path $LogFile -Value "$StartMsg"
 
 # 1. ฟังก์ชันสำหรับอ่านค่าปัจจุบัน (Reusable)
 function Get-NetworkLogonRight {
@@ -55,14 +52,12 @@ $IsMatch = ($SortedCurrent -join ",") -eq ($SortedDesired -join ",")
 if ($null -eq $CurrentSIDs) {
     $Msg = "[!] Error: Could not read current policy."
     Write-Host $Msg -ForegroundColor Red
-    Add-Content -Path $LogFile -Value $Msg
-    $Status = "NON-COMPLIANT"
+        $Status = "NON-COMPLIANT"
 }
 elseif (-not $IsMatch) {
     $Msg = "Value is incorrect. Current: $($SortedCurrent -join ", "). Fixing..."
     Write-Host $Msg -ForegroundColor Yellow
-    Add-Content -Path $LogFile -Value $Msg
-    
+        
     try {
         # สร้างไฟล์ .inf สำหรับ Configure
         $FixInf = "$env:TEMP\remediate_2.2.3.inf"
@@ -91,13 +86,11 @@ SeNetworkLogonRight = $DesiredString
             if (($SortedNew -join ",") -eq ($SortedDesired -join ",")) {
                 $ResultMsg = "Fixed. New configuration applied."
                 Write-Host $ResultMsg -ForegroundColor Green
-                Add-Content -Path $LogFile -Value $ResultMsg
-                $Status = "COMPLIANT"
+                                $Status = "COMPLIANT"
             } else {
                 $FailMsg = "Verification failed. Value remains: $($SortedNew -join ", ")"
                 Write-Host $FailMsg -ForegroundColor Red
-                Add-Content -Path $LogFile -Value $FailMsg
-                $Status = "NON-COMPLIANT"
+                                $Status = "NON-COMPLIANT"
             }
         } else {
             throw "Secedit command failed with exit code $($Proc.ExitCode)"
@@ -106,22 +99,18 @@ SeNetworkLogonRight = $DesiredString
     } catch {
         $ErrorMsg = "Failed to fix: $_"
         Write-Host $ErrorMsg -ForegroundColor Red
-        Add-Content -Path $LogFile -Value $ErrorMsg
-        $Status = "NON-COMPLIANT"
+                $Status = "NON-COMPLIANT"
     }
 
 } else {
     $Msg = "Value is correct. No action needed."
     Write-Host $Msg -ForegroundColor Green
-    Add-Content -Path $LogFile -Value $Msg
-    $Status = "COMPLIANT"
+        $Status = "COMPLIANT"
 }
 
 Write-Host "=============================================================="
 Write-Host "Remediation completed at $(Get-Date)"
 Write-Host "Final Status: $Status"
 Write-Host "=============================================================="
-Add-Content -Path $LogFile -Value "Final Status: $Status"
-Add-Content -Path $LogFile -Value "=============================================================="
 
 if ($Status -eq "COMPLIANT") { exit 0 } else { exit 1 }

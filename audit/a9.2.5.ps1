@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 9.2.5 (L1) - Audit Script
-# Description: FW Private: Log Size
+# Description: Ensure 'Windows Firewall: Private: Logging: Size limit (KB)' is set to '16,384 KB or greater' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
