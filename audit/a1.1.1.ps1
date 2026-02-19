@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 1.1.1 (L1) - Audit Script
-# Description: Ensure 'Enforce password history' is set to '24 or more password(s)'
+# Description: Ensure 'Enforce password history' is set to '24 or more password(s)' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

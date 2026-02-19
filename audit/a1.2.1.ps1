@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 1.2.1 (L1) - Audit Script
-# Description: Ensure 'Account lockout duration' is set to '15 or more minute(s)'
+# Description: Ensure 'Account lockout duration' is set to '15 or more minute(s)' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

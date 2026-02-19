@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 2.2.24 (L1) - Audit Script (Standardized)
-# Description: Deny log on as a service
+# Description: Ensure 'Deny log on as a service' to include 'Guests' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
@@ -9,7 +9,7 @@ $DesiredSids = @("S-1-5-32-546")
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 2.2.24: Deny log on as a service"
+Write-Host "Control 2.2.24: Ensure 'Deny log on as a service' to include 'Guests' (Automated)"
 Write-Host "=============================================================="
 
 $Privilege = "SeDenyServiceLogonRight"

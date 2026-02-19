@@ -1,31 +1,37 @@
 # ==============================================================
 # CIS Check: 9.1.6 (L1) - Audit Script
-# Description: FW Domain: Log Dropped
+# Description: FW Domain: Log Dropped Packets (Registry Check for Nessus)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$DesiredValue = "True"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 9.1.6: FW Domain: Log Dropped"
+Write-Host "Control 9.1.6: FW Domain: Log Dropped Packets"
 Write-Host "=============================================================="
 
-
 try {
-    $Profile = "Domain"
-    $Prop = "LogDroppedPackets"
-    $Exp = "True"
+    # Nessus/CIS checks this specific Policy Registry Path
+    $RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsFirewall\DomainProfile\Logging"
+    $RegName = "LogDroppedPackets"
+    $Exp = "1" # 1 = Yes
+
+    $Val = Get-ItemProperty -Path $RegPath -Name $RegName -ErrorAction SilentlyContinue
     
-    $Curr = Get-NetFirewallProfile -Profile $Profile | Select-Object -ExpandProperty $Prop
+    if ($Val) {
+        $Curr = $Val.$RegName.ToString()
+    } else {
+        $Curr = "Not Set"
+    }
     
-    if ("$Curr" -eq $Exp) {
-        Write-Host "$Profile $Prop is $Curr (Correct)" -ForegroundColor Green
+    if ($Curr -eq $Exp) {
+        Write-Host "Registry $RegName is $Curr (Correct)" -ForegroundColor Green
         $Status = "COMPLIANT"
     } else {
-        Write-Host "$Profile $Prop is $Curr (Expected: $Exp)" -ForegroundColor Red
+        Write-Host "Registry $RegName is $Curr (Expected: $Exp)" -ForegroundColor Red
         $Status = "NON-COMPLIANT"
     }
+
 } catch {
     $Status = "NON-COMPLIANT"
 }

@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 9.2.7 (L1) - Remediation Script
-# Description: FW Private: Log Success
+# Description: FW Private: Log Success (Registry & Cmdlet)
 # ==============================================================
 
 $LogFile = "C:\Windows\Temp\remediate_9_2_7.log"
@@ -15,14 +15,26 @@ Write-Host "=============================================================="
 Add-Content -Path $LogFile -Value "`n=============================================================="
 Add-Content -Path $LogFile -Value "$StartMsg"
 
-
 try {
-    $Profile = "Private"
-    Set-NetFirewallProfile -Profile $Profile -LogAllowedConnections "True"
-    $Msg = "Set Firewall $Profile LogAllowedConnections to True"
+    # 1. Set Active Setting via Cmdlet
+    Set-NetFirewallProfile -Profile Private -LogAllowed True -ErrorAction SilentlyContinue
+    
+    # 2. Set Policy Registry
+    $RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsFirewall\PrivateProfile\Logging"
+    $RegName = "LogAllowedConnections"
+    $Value = 1
+    
+    if (!(Test-Path $RegPath)) {
+        New-Item -Path $RegPath -Force | Out-Null
+    }
+    
+    Set-ItemProperty -Path $RegPath -Name $RegName -Value $Value -Type DWord -Force
+    
+    $Msg = "Set Registry $RegName to $Value (Enabled)"
     Write-Host $Msg -ForegroundColor Green
     Add-Content -Path $LogFile -Value $Msg
     $Status = "COMPLIANT"
+
 } catch {
     $Status = "NON-COMPLIANT"
 }

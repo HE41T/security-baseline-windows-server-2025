@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 2.3.1.4 (L1) - Audit Script
-# Description: Rename guest account
+# Description: Configure 'Accounts: Rename guest account' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
@@ -8,7 +8,7 @@ $DesiredValue = "Enabled"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 2.3.1.4: Rename guest account"
+Write-Host "Control 2.3.1.4: Configure 'Accounts: Rename guest account' (Automated)"
 Write-Host "=============================================================="
 
 

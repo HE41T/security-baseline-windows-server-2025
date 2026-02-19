@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 2.3.9.3 (L1) - Audit Script
-# Description: Microsoft network server: Digitally sign (if client agrees)
+# Description: Ensure 'Microsoft network server: Digitally sign communications (if client agrees)' is set to 'Enabled' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

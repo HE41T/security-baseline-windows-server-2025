@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 1.1.6 (L1) - Audit Script
-# Description: Ensure 'Relax minimum password length limits' is set to 'Enabled'
+# Description: Ensure 'Relax minimum password length limits' is set to 'Enabled' (Automated)
 # Registry: HKLM\SYSTEM\CurrentControlSet\Control\SAM -> RelaxMinimumPasswordLengthLimits = 1
 # ==============================================================
 

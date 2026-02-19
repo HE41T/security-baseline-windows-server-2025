@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 2.3.1.3 (L1) - Audit Script
-# Description: Rename administrator account
+# Description: Configure 'Accounts: Rename administrator account' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
@@ -8,7 +8,7 @@ $DesiredValue = "Enabled"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 2.3.1.3: Rename administrator account"
+Write-Host "Control 2.3.1.3: Configure 'Accounts: Rename administrator account' (Automated)"
 Write-Host "=============================================================="
 
 
