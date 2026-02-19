@@ -1,12 +1,12 @@
 ﻿# ==============================================================
 # CIS Check: 18.10.4.2 (L1) - Audit Script
-# Description: Ensure 18.10.4.2 AllowPerUserDeployment is set to 0
+# Description: Ensure 18.10.4.2 DisablePerUserUnsignedPackagesByDefault is set to 1
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$DesiredValue = 0
+$DesiredValue = 1
 $RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Appx"
-$RegName = "AllowPerUserDeployment"
+$RegName = "DisablePerUserUnsignedPackagesByDefault"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"

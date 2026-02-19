@@ -1,12 +1,12 @@
 ﻿# ==============================================================
 # CIS Check: 18.7.7 (L1) - Remediation Script
-# Description: Ensure 18.7.7 ServerIpPort is set to 0
+# Description: Ensure 18.7.7 RpcTcpPort is set to 0
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 0
-$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Rpc"
-$RegName = "ServerIpPort"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers\RPC"
+$RegName = "RpcTcpPort"
 
 $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="

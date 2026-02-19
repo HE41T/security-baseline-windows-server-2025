@@ -1,63 +1,53 @@
 ﻿# ==============================================================
 # CIS Check: 18.6.14.1 (L1) - Remediation Script
-# Description: Ensure 18.6.14.1 \\*\NETLOGON is set to RequireMutualAuthentication=1, RequireIntegrity=1, RequirePrivacy=1
+# Description: Ensure Hardened UNC Paths for NETLOGON and SYSVOL
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$DesiredValue = "RequireMutualAuthentication=1, RequireIntegrity=1, RequirePrivacy=1"
 $RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\NetworkProvider\HardenedPaths"
-$RegName = "\\*\NETLOGON"
+$PathsToHarden = @("\\*\NETLOGON", "\\*\SYSVOL")
+$DesiredValue = "RequireMutualAuthentication=1, RequireIntegrity=1, RequirePrivacy=1"
 
-$StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="
-Write-Host $StartMsg
-Write-Host "Control 18.6.14.1: Set $RegName to $DesiredValue"
+Write-Host "Remediation started: $Date"
+Write-Host "Control 18.6.14.1: Hardening UNC Paths (NETLOGON & SYSVOL)"
 Write-Host "=============================================================="
 
-function Get-RegistryValue {
-    try {
-        $RegData = Get-ItemProperty -Path $RegPath -Name $RegName -ErrorAction SilentlyContinue
-        if ($RegData -and $RegData.$RegName -ne $null) { return $RegData.$RegName }
-        return $null
-    } catch { return $null }
-}
+$GlobalStatus = "COMPLIANT"
 
-$CurrentValue = Get-RegistryValue
-
-if ($null -eq $CurrentValue -or $CurrentValue -ne $DesiredValue) {
-    $Msg = "Value is incorrect or missing ($CurrentValue). Fixing..."
-    Write-Host $Msg -ForegroundColor Yellow
+foreach ($PathName in $PathsToHarden) {
+    Write-Host "Checking: $PathName" -NoNewline
     
-    try {
-        if (!(Test-Path $RegPath)) { New-Item -Path $RegPath -Force | Out-Null }
+    # 1. ตรวจสอบค่าปัจจุบัน
+    $CurrentValue = (Get-ItemProperty -Path $RegPath -Name $PathName -ErrorAction SilentlyContinue).$PathName
+    
+    if ($null -eq $CurrentValue -or $CurrentValue -ne $DesiredValue) {
+        Write-Host " -> [INCORRECT]" -ForegroundColor Yellow
+        Write-Host "Fixing $PathName..." -ForegroundColor Cyan
         
-        # เนเธเนเนเธเธเนเธฒ Registry
-        Set-ItemProperty -Path $RegPath -Name $RegName -Value $DesiredValue -Type String -Force
-        
-        $NewValue = Get-RegistryValue
-        if ($NewValue -eq $DesiredValue) {
-            $ResultMsg = "Fixed. New value is $NewValue."
-            Write-Host $ResultMsg -ForegroundColor Green
-            $Status = "COMPLIANT"
-        } else {
-            $FailMsg = "Verification failed. Value remains $NewValue"
-            Write-Host $FailMsg -ForegroundColor Red
-            $Status = "NON-COMPLIANT"
+        try {
+            if (!(Test-Path $RegPath)) { New-Item -Path $RegPath -Force | Out-Null }
+            Set-ItemProperty -Path $RegPath -Name $PathName -Value $DesiredValue -Type String -Force
+            
+            # ตรวจสอบซ้ำหลังแก้
+            $Verify = (Get-ItemProperty -Path $RegPath -Name $PathName -ErrorAction SilentlyContinue).$PathName
+            if ($Verify -eq $DesiredValue) {
+                Write-Host "Successfully fixed: $PathName" -ForegroundColor Green
+            } else {
+                Write-Host "Failed to fix: $PathName" -ForegroundColor Red
+                $GlobalStatus = "NON-COMPLIANT"
+            }
+        } catch {
+            Write-Host "Error: $_" -ForegroundColor Red
+            $GlobalStatus = "NON-COMPLIANT"
         }
-    } catch {
-        $ErrorMsg = "Failed to fix: $_"
-        Write-Host $ErrorMsg -ForegroundColor Red
-        $Status = "NON-COMPLIANT"
+    } else {
+        Write-Host " -> [OK]" -ForegroundColor Green
     }
-} else {
-    $Msg = "Value is correct ($CurrentValue). No action needed."
-    Write-Host $Msg -ForegroundColor Green
-    $Status = "COMPLIANT"
 }
 
 Write-Host "=============================================================="
-Write-Host "Remediation completed at $(Get-Date)"
-Write-Host "Final Status: $Status"
+Write-Host "Final Status: $GlobalStatus"
 Write-Host "=============================================================="
 
-if ($Status -eq "COMPLIANT") { exit 0 } else { exit 1 }
+if ($GlobalStatus -eq "COMPLIANT") { exit 0 } else { exit 1 }

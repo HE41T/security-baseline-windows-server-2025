@@ -1,12 +1,12 @@
 ﻿# ==============================================================
 # CIS Check: 18.9.28.1 (L1) - Remediation Script
-# Description: Ensure 18.9.28.1 BlockUserAccountControl is set to 1
+# Description: Ensure 18.9.28.1 BlockUserFromShowingAccountDetailsOnSignin is set to 1
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 1
-$RegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
-$RegName = "BlockUserAccountControl"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+$RegName = "BlockUserFromShowingAccountDetailsOnSignin"
 
 $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="

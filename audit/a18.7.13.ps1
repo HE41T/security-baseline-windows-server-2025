@@ -1,10 +1,10 @@
 ﻿# ==============================================================
 # CIS Check: 18.7.13 (L1) - Audit Script
-# Description: Ensure 18.7.13 UpdatePromptSettings is set to 2
+# Description: Ensure 18.7.13 UpdatePromptSettings is set to 0
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$DesiredValue = 2
+$DesiredValue = 0
 $RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers\PointAndPrint"
 $RegName = "UpdatePromptSettings"
 

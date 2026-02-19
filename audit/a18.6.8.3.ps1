@@ -1,12 +1,12 @@
 ﻿# ==============================================================
 # CIS Check: 18.6.8.3 (L1) - Audit Script
-# Description: Ensure 18.6.8.3 AuditClientDoesNotSupportSigning is set to 1
+# Description: Ensure 18.6.8.3 AuditServerDoesNotSupportSigning is set to 1
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 1
-$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters"
-$RegName = "AuditClientDoesNotSupportSigning"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\LanmanWorkstation"
+$RegName = "AuditServerDoesNotSupportSigning" 
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"

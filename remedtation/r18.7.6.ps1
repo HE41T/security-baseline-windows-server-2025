@@ -1,12 +1,12 @@
 ﻿# ==============================================================
 # CIS Check: 18.7.6 (L1) - Remediation Script
-# Description: Ensure 18.7.6 ServerAuthenticationLevel is set to 1
+# Description: Ensure 18.7.6 ForceKerberosForRpcl is set to 1
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 1
-$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Rpc"
-$RegName = "ServerAuthenticationLevel"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers\RPC"
+$RegName = "ForceKerberosForRpc"
 
 $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="

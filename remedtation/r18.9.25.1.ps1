@@ -1,12 +1,12 @@
 ﻿# ==============================================================
 # CIS Check: 18.9.25.1 (L1) - Remediation Script
-# Description: Ensure 18.9.25.1 PasswordBackupEnabled is set to 1
+# Description: Ensure 18.9.25.1 BackupDirectory is set to 1
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 1
-$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft Services\AdmPwd"
-$RegName = "PasswordBackupEnabled"
+$RegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\LAPS"
+$RegName = "BackupDirectory"
 
 $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="

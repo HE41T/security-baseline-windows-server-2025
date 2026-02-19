@@ -4,9 +4,9 @@
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers"
+$RegName = "RedirectionguardPolicy" # แก้จาก 'Enabled' เป็น 'RedirectionguardPolicy'
 $DesiredValue = 1
-$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Redirection Guard"
-$RegName = "Enabled"
 
 $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="

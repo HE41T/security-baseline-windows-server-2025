@@ -1,44 +1,40 @@
 ﻿# ==============================================================
 # CIS Check: 18.6.14.1 (L1) - Audit Script
-# Description: Ensure 18.6.14.1 \\*\NETLOGON is set to RequireMutualAuthentication=1, RequireIntegrity=1, RequirePrivacy=1
+# Description: Ensure Hardened UNC Paths for NETLOGON and SYSVOL
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$DesiredValue = "RequireMutualAuthentication=1, RequireIntegrity=1, RequirePrivacy=1"
 $RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\NetworkProvider\HardenedPaths"
-$RegName = "\\*\NETLOGON"
+$PathsToHarden = @("\\*\NETLOGON", "\\*\SYSVOL")
+$DesiredValue = "RequireMutualAuthentication=1, RequireIntegrity=1, RequirePrivacy=1"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 18.6.14.1: $RegName must be $DesiredValue"
+Write-Host "Control 18.6.14.1: Hardening UNC Paths (NETLOGON & SYSVOL)"
 Write-Host "=============================================================="
 
-try {
-    $RegData = Get-ItemProperty -Path $RegPath -Name $RegName -ErrorAction SilentlyContinue
-    if ($RegData -and $RegData.$RegName -ne $null) {
-        $CurrentValue = $RegData.$RegName
-    } else { $CurrentValue = $null }
-} catch {
-    $CurrentValue = $null
-    Write-Host "[!] Error retrieving policy: $_" -ForegroundColor Red
-}
+$Status = "COMPLIANT"
 
-if ($null -eq $CurrentValue) {
-    Write-Host "[!] Unable to determine current value." -ForegroundColor Red
-    $Status = "NON-COMPLIANT"
-}
-elseif ($CurrentValue -eq $DesiredValue) {
-    Write-Host "Value is correct ($CurrentValue). No action needed." -ForegroundColor Green
-    $Status = "COMPLIANT"
-}
-else {
-    $ShowVal = if ($CurrentValue -eq $null) { "Not Configured" } else { $CurrentValue }
-    Write-Host "Value is incorrect ($ShowVal). Expected: $DesiredValue" -ForegroundColor Red
-    $Status = "NON-COMPLIANT"
+# วนลูปตรวจสอบทั้ง 2 Path (NETLOGON และ SYSVOL)
+foreach ($PathName in $PathsToHarden) {
+    $RegData = Get-ItemProperty -Path $RegPath -Name $PathName -ErrorAction SilentlyContinue
+    
+    # ดึงค่าออกมา ถ้าไม่มีให้เป็น $null
+    $CurrentValue = if ($null -ne $RegData -and $null -ne $RegData.$PathName) { $RegData.$PathName } else { $null }
+
+    if ($CurrentValue -ne $DesiredValue) {
+        $ShowVal = if ($null -eq $CurrentValue) { "Not Configured" } else { $CurrentValue }
+        Write-Host "[!] $PathName is Incorrect or Missing ($ShowVal)" -ForegroundColor Red
+        
+        # ถ้าเจอตัวใดตัวหนึ่งผิด ให้ปรับ Status รวมเป็น NON-COMPLIANT ทันที
+        $Status = "NON-COMPLIANT"
+    } else {
+        Write-Host "[OK] $PathName is Correct" -ForegroundColor Green
+    }
 }
 
 Write-Host "=============================================================="
-Write-Host "Audit completed at $(Get-Date)"
+Write-Host "Audit completed at $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
 Write-Host "Status: $Status"
 Write-Host "=============================================================="
 

@@ -1,12 +1,12 @@
 ﻿# ==============================================================
 # CIS Check: 18.6.7.2 (L1) - Remediation Script
-# Description: Ensure 18.6.7.2 AuditServerDoesNotSupportSigning is set to 1
+# Description: Ensure 18.6.7.2 AuditClientDoesNotSupportSigning is set to 1
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 1
-$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters"
-$RegName = "AuditServerDoesNotSupportSigning"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\LanmanServer"
+$RegName = "AuditClientDoesNotSupportSigning"
 
 $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="
