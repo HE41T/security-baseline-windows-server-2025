@@ -1,55 +1,44 @@
 # ==============================================================
 # CIS Check: 19.7.5.2 (L1) - Audit Script
-# Description: Ensure 'Notify antivirus programs when opening attachments' is set to 'Enabled' (Automated)
-# Verification: Iterate through HKU user hives to confirm the setting
+# Description: Ensure 'Notify antivirus programs when opening attachments' is set to 'Enabled'
+# Registry Path: HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Attachments\ScanWithAntiVirus
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$SubPath = "Software\Microsoft\Windows\CurrentVersion\Policies\Attachments"
-$ValueName = "ScanWithAntiVirus"
 $DesiredValue = 3
+$RegPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Attachments"
+$ValueName = "ScanWithAntiVirus"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 19.7.5.2: Ensure 'Notify antivirus programs when opening attachments' is set to 'Enabled' (Automated)"
+Write-Host "Control 19.7.5.2: Check Antivirus Notification for Attachments"
 Write-Host "=============================================================="
 
-$Status = "COMPLIANT"
-$NonCompliant = @()
-$Sids = Get-ChildItem HKU:\ | Where-Object { $_.PSChildName -match '^S-1-5-21-' }
-if (-not $Sids) {
-    Write-Host "No user hives were detected under HKU:\" -ForegroundColor Yellow
-    $Status = "NON-COMPLIANT"
-}
-else {
-    foreach ($Sid in $Sids) {
-        $RegistryPath = Join-Path "HKU:\$($Sid.PSChildName)" $SubPath
-        if (-not (Test-Path -Path $RegistryPath)) {
-            Write-Host "[!] Missing key for $($Sid.PSChildName): $RegistryPath" -ForegroundColor Yellow
-            $NonCompliant += "$($Sid.PSChildName) (missing key)"
-            $Status = "NON-COMPLIANT"
-            continue
+function Get-AVNotificationStatus {
+    try {
+        if (-not (Test-Path -Path $RegPath)) {
+            return $null
         }
-        try {
-            $Value = Get-ItemPropertyValue -Path $RegistryPath -Name $ValueName -ErrorAction Stop
-        } catch {
-            Write-Host "[!] Could not read $ValueName for $($Sid.PSChildName)." -ForegroundColor Yellow
-            $NonCompliant += "$($Sid.PSChildName) (missing value)"
-            $Status = "NON-COMPLIANT"
-            continue
-        }
-        if ([int]$Value -ne $DesiredValue) {
-            Write-Host "[!] $($Sid.PSChildName): Current value is $Value, expected $DesiredValue." -ForegroundColor Red
-            $NonCompliant += "$($Sid.PSChildName) (value $Value)"
-            $Status = "NON-COMPLIANT"
-        } else {
-            Write-Host "$($Sid.PSChildName): Value is $Value." -ForegroundColor Green
-        }
+        $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
+        return [int]$Value
+    } catch {
+        return $null
     }
 }
 
-if ($NonCompliant.Count -gt 0) {
-    Write-Host "Non-compliant SIDs: $($NonCompliant -join ', ')" -ForegroundColor Red
+$CurrentValue = Get-AVNotificationStatus
+
+if ($null -eq $CurrentValue) {
+    Write-Host "[!] Value is NOT configured (Default is Disabled)." -ForegroundColor Yellow
+    $Status = "NON-COMPLIANT"
+}
+elseif ($CurrentValue -eq $DesiredValue) {
+    Write-Host "Value is Compliant ($CurrentValue - AV Notification is ENABLED)." -ForegroundColor Green
+    $Status = "COMPLIANT"
+}
+else {
+    Write-Host "Value is incorrect ($CurrentValue). Antivirus is NOT being notified!" -ForegroundColor Red
+    $Status = "NON-COMPLIANT"
 }
 
 Write-Host "=============================================================="

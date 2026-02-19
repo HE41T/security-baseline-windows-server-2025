@@ -1,46 +1,43 @@
 # ==============================================================
 # CIS Check: 18.10.58.2 (L1) - Audit Script
-# Description: Ensure 'Turn on Basic feed authentication over HTTP' is set to 'Disabled' (Automated)
-# Registry Path: HKLM\Software\Policies\Microsoft\Internet Explorer\Feeds
+# Description: Ensure 'Turn on Basic feed authentication over HTTP' is set to 'Disabled'
+# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds\AllowBasicAuthInClear
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$RegPath = "HKLM\\Software\\Policies\\Microsoft\\Internet Explorer\\Feeds"
-$ValueName = "AllowBasicAuthInClear"
 $DesiredValue = 0
-$ValueType = "DWord"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds"
+$ValueName = "AllowBasicAuthInClear"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 18.10.58.2: Ensure 'Turn on Basic feed authentication over HTTP' is set to 'Disabled' (Automated)"
+Write-Host "Control 18.10.58.2: Check RSS Basic Auth over HTTP Status"
 Write-Host "=============================================================="
 
-function Get-PolicyValue {
+function Get-RSSBasicAuthValue {
     try {
         if (-not (Test-Path -Path $RegPath)) {
             return $null
         }
         $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
-        if ($ValueType -eq "DWord") {
-            return [int]$Value
-        }
-        return [string]$Value
+        return [int]$Value
     } catch {
-        Write-Host "[!] Failed reading registry value: $_" -ForegroundColor Yellow
         return $null
     }
 }
 
-$CurrentValue = Get-PolicyValue
+$CurrentValue = Get-RSSBasicAuthValue
 
 if ($null -eq $CurrentValue) {
-    Write-Host "[!] Unable to determine current setting." -ForegroundColor Yellow
+    Write-Host "[!] Value is NOT configured via GPO (Default is Disabled)." -ForegroundColor Yellow
     $Status = "NON-COMPLIANT"
-} elseif ($CurrentValue -eq $DesiredValue) {
-    Write-Host "Current value is $CurrentValue. Policy is compliant." -ForegroundColor Green
+}
+elseif ($CurrentValue -eq $DesiredValue) {
+    Write-Host "Value is Compliant ($CurrentValue - Basic Auth over HTTP is Disabled)." -ForegroundColor Green
     $Status = "COMPLIANT"
-} else {
-    Write-Host "Current value is $CurrentValue. Expected: $DesiredValue." -ForegroundColor Red
+}
+else {
+    Write-Host "Value is incorrect ($CurrentValue). Basic Auth over HTTP is ALLOWED!" -ForegroundColor Red
     $Status = "NON-COMPLIANT"
 }
 

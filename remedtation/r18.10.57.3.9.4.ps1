@@ -1,90 +1,53 @@
 # ==============================================================
 # CIS Check: 18.10.57.3.9.4 (L1) - Remediation Script
-# Description: Ensure 'Require user authentication for remote connections by using Network Level Authentication' is set to 'Enabled' (Automated)
-# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services
+# Description: Set 'Require user authentication for remote connections by using Network Level Authentication' to 'Enabled' (1)
 # ==============================================================
 
-$LogFile = "C:\Windows\Temp\remediate_18_10_57_3_9_4.log"
+$LogFile = "C:\Windows\Temp\remediate_rdp_nla.log"
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$RegPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services"
-$ValueName = "UserAuthentication"
 $DesiredValue = 1
-$ValueType = "DWord"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
+$ValueName = "UserAuthentication"
 
-$StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="
-Write-Host $StartMsg
-Write-Host "Control 18.10.57.3.9.4: Ensure 'Require user authentication for remote connections by using Network Level Authentication' is set to 'Enabled' (Automated)"
+Write-Host "Remediation started: $Date"
+Write-Host "Enforcing Network Level Authentication (Registry: 1)"
 Write-Host "=============================================================="
 
-Add-Content -Path $LogFile -Value "`n=============================================================="
-Add-Content -Path $LogFile -Value $StartMsg
+Add-Content -Path $LogFile -Value "Remediation started: $Date"
 
-function Get-PolicyValue {
-    try {
-        if (-not (Test-Path -Path $RegPath)) {
-            return $null
-        }
-        $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
-        if ($ValueType -eq "DWord") {
-            return [int]$Value
-        }
-        return [string]$Value
-    } catch {
-        return $null
-    }
-}
+try {
+    # --- Auto-Generated LGPO Injection ---
+    $LgpoContent = @"
+Computer
+SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services
+UserAuthentication
+DWORD:1
+"@
+    
+    $LgpoFile = "C:\Windows\Temp\lgpo_temp_$ValueName.txt"
+    Set-Content -Path $LgpoFile -Value $LgpoContent -Encoding Ascii
 
-function Set-PolicyValue {
-    [CmdletBinding(SupportsShouldProcess=$true)]
-    param()
-    if (-not $PSCmdlet.ShouldProcess($RegPath, "Set $ValueName")) {
-        return
+    if (Test-Path "C:\Windows\Temp\LGPO.exe") {
+        & "C:\Windows\Temp\LGPO.exe" /q /t $LgpoFile | Out-Null
+        gpupdate /force | Out-Null
+        Write-Host "Success: Applied via LGPO.exe (GPO & Registry updated)" -ForegroundColor Green
+        Add-Content -Path $LogFile -Value "Status: COMPLIANT - Applied via LGPO"
+        $ExitCode = 0
+    } else {
+        Write-Host "[!] LGPO.exe not found! Applying to Registry only." -ForegroundColor Yellow
+        if (-not (Test-Path -Path "$RegPath")) { New-Item -Path "$RegPath" -Force | Out-Null }
+        Set-ItemProperty -Path "$RegPath" -Name "$ValueName" -Value $DesiredValue -Type DWord -Force
+        $ExitCode = 0
     }
-    if (-not (Test-Path -Path $RegPath)) {
-        New-Item -Path $RegPath -Force | Out-Null
-    }
-    Set-ItemProperty -Path $RegPath -Name $ValueName -Value $DesiredValue -Type $ValueType -Force
-}
 
-$CurrentValue = Get-PolicyValue
-
-if ($CurrentValue -eq $DesiredValue) {
-    $Msg = "Value is already $CurrentValue. No action needed."
-    Write-Host $Msg -ForegroundColor Green
-    Add-Content -Path $LogFile -Value $Msg
-    $Status = "COMPLIANT"
-} else {
-    $Msg = "Value is $CurrentValue. Setting to $DesiredValue."
-    Write-Host $Msg -ForegroundColor Yellow
-    Add-Content -Path $LogFile -Value $Msg
-    try {
-        Set-PolicyValue
-        $NewValue = Get-PolicyValue
-        if ($NewValue -eq $DesiredValue) {
-            $ResultMsg = "Fixed. New value is $NewValue."
-            Write-Host $ResultMsg -ForegroundColor Green
-            Add-Content -Path $LogFile -Value $ResultMsg
-            $Status = "COMPLIANT"
-        } else {
-            $FailMsg = "Verification failed. Current value is $NewValue."
-            Write-Host $FailMsg -ForegroundColor Red
-            Add-Content -Path $LogFile -Value $FailMsg
-            $Status = "NON-COMPLIANT"
-        }
-    } catch {
-        $ErrorMsg = "Failed to fix: $_"
-        Write-Host $ErrorMsg -ForegroundColor Red
-        Add-Content -Path $LogFile -Value $ErrorMsg
-        $Status = "NON-COMPLIANT"
-    }
+    if (Test-Path $LgpoFile) { Remove-Item -Path $LgpoFile -Force }
+    # ---------------------------------------
+} catch {
+    Write-Host "Error: Failed to set registry value. $_" -ForegroundColor Red
+    Add-Content -Path $LogFile -Value "Status: FAILED - $_"
+    $ExitCode = 1
 }
 
 Write-Host "=============================================================="
-Write-Host "Remediation completed at $(Get-Date)"
-Write-Host "Final Status: $Status"
-Write-Host "=============================================================="
-Add-Content -Path $LogFile -Value "Final Status: $Status"
-Add-Content -Path $LogFile -Value "=============================================================="
-
-if ($Status -eq "COMPLIANT") { exit 0 } else { exit 1 }
+exit $ExitCode

@@ -1,46 +1,43 @@
 # ==============================================================
 # CIS Check: 18.10.89.2.3 (L1) - Audit Script
-# Description: Ensure 'Allow unencrypted traffic' is set to 'Disabled' (Automated)
-# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service
+# Description: Ensure 'Allow unencrypted traffic' for WinRM Service is set to 'Disabled'
+# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service\AllowUnencryptedTraffic
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$RegPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\WinRM\\Service"
-$ValueName = "AllowUnencryptedTraffic"
 $DesiredValue = 0
-$ValueType = "DWord"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service"
+$ValueName = "AllowUnencryptedTraffic"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 18.10.89.2.3: Ensure 'Allow unencrypted traffic' is set to 'Disabled' (Automated)"
+Write-Host "Control 18.10.89.2.3: Check WinRM Service Unencrypted Traffic"
 Write-Host "=============================================================="
 
-function Get-PolicyValue {
+function Get-WinRMServiceEncryptionStatus {
     try {
         if (-not (Test-Path -Path $RegPath)) {
             return $null
         }
         $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
-        if ($ValueType -eq "DWord") {
-            return [int]$Value
-        }
-        return [string]$Value
+        return [int]$Value
     } catch {
-        Write-Host "[!] Failed reading registry value: $_" -ForegroundColor Yellow
         return $null
     }
 }
 
-$CurrentValue = Get-PolicyValue
+$CurrentValue = Get-WinRMServiceEncryptionStatus
 
 if ($null -eq $CurrentValue) {
-    Write-Host "[!] Unable to determine current setting." -ForegroundColor Yellow
+    Write-Host "[!] Value is NOT configured via GPO (Default is Disabled/Secure)." -ForegroundColor Yellow
     $Status = "NON-COMPLIANT"
-} elseif ($CurrentValue -eq $DesiredValue) {
-    Write-Host "Current value is $CurrentValue. Policy is compliant." -ForegroundColor Green
+}
+elseif ($CurrentValue -eq $DesiredValue) {
+    Write-Host "Value is Compliant ($CurrentValue - Unencrypted Traffic is Rejected)." -ForegroundColor Green
     $Status = "COMPLIANT"
-} else {
-    Write-Host "Current value is $CurrentValue. Expected: $DesiredValue." -ForegroundColor Red
+}
+else {
+    Write-Host "Value is incorrect ($CurrentValue). WinRM Service is ALLOWING Unencrypted Traffic!" -ForegroundColor Red
     $Status = "NON-COMPLIANT"
 }
 

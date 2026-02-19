@@ -1,46 +1,43 @@
 # ==============================================================
 # CIS Check: 18.10.57.3.11.2 (L1) - Audit Script
-# Description: Ensure 'Do not use temporary folders per session' is set to 'Disabled' (Automated)
-# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services
+# Description: Ensure 'Do not use temporary folders per session' is set to 'Disabled'
+# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services\PerSessionTempDir
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$RegPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services"
-$ValueName = "PerSessionTempDir"
 $DesiredValue = 1
-$ValueType = "DWord"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
+$ValueName = "PerSessionTempDir"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 18.10.57.3.11.2: Ensure 'Do not use temporary folders per session' is set to 'Disabled' (Automated)"
+Write-Host "Control 18.10.57.3.11.2: Check Per-Session Temp Folders Status"
 Write-Host "=============================================================="
 
-function Get-PolicyValue {
+function Get-PerSessionTempValue {
     try {
         if (-not (Test-Path -Path $RegPath)) {
             return $null
         }
         $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
-        if ($ValueType -eq "DWord") {
-            return [int]$Value
-        }
-        return [string]$Value
+        return [int]$Value
     } catch {
-        Write-Host "[!] Failed reading registry value: $_" -ForegroundColor Yellow
         return $null
     }
 }
 
-$CurrentValue = Get-PolicyValue
+$CurrentValue = Get-PerSessionTempValue
 
 if ($null -eq $CurrentValue) {
-    Write-Host "[!] Unable to determine current setting." -ForegroundColor Yellow
+    Write-Host "[!] Value is NOT configured via GPO (Default is Disabled/Use Per-Session)." -ForegroundColor Yellow
     $Status = "NON-COMPLIANT"
-} elseif ($CurrentValue -eq $DesiredValue) {
-    Write-Host "Current value is $CurrentValue. Policy is compliant." -ForegroundColor Green
+}
+elseif ($CurrentValue -eq $DesiredValue) {
+    Write-Host "Value is Compliant ($CurrentValue - Per-session temp is ENABLED)." -ForegroundColor Green
     $Status = "COMPLIANT"
-} else {
-    Write-Host "Current value is $CurrentValue. Expected: $DesiredValue." -ForegroundColor Red
+}
+else {
+    Write-Host "Value is incorrect ($CurrentValue). Per-session temp folders are DISABLED!" -ForegroundColor Red
     $Status = "NON-COMPLIANT"
 }
 

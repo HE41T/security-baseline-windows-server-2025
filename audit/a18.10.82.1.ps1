@@ -1,46 +1,43 @@
 # ==============================================================
 # CIS Check: 18.10.82.1 (L1) - Audit Script
-# Description: Ensure 'Configure the transmission of the user's password in the content of MPR notifications sent by winlogon.' is set to 'Disabled' (Automated)
-# Registry Path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
+# Description: Ensure 'Configure the transmission of the user's password in MPR notifications' is set to 'Disabled'
+# Registry Path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableMPR
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$RegPath = "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System"
-$ValueName = "EnableMPR"
 $DesiredValue = 0
-$ValueType = "DWord"
+$RegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+$ValueName = "EnableMPR"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 18.10.82.1: Ensure 'Configure the transmission of the user's password in the content of MPR notifications sent by winlogon.' is set to 'Disabled' (Automated)"
+Write-Host "Control 18.10.82.1: Check MPR Password Transmission Status"
 Write-Host "=============================================================="
 
-function Get-PolicyValue {
+function Get-MPRStatus {
     try {
         if (-not (Test-Path -Path $RegPath)) {
             return $null
         }
         $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
-        if ($ValueType -eq "DWord") {
-            return [int]$Value
-        }
-        return [string]$Value
+        return [int]$Value
     } catch {
-        Write-Host "[!] Failed reading registry value: $_" -ForegroundColor Yellow
         return $null
     }
 }
 
-$CurrentValue = Get-PolicyValue
+$CurrentValue = Get-MPRStatus
 
 if ($null -eq $CurrentValue) {
-    Write-Host "[!] Unable to determine current setting." -ForegroundColor Yellow
+    Write-Host "[!] Value is NOT configured via GPO (Default is Disabled/Secure)." -ForegroundColor Yellow
     $Status = "NON-COMPLIANT"
-} elseif ($CurrentValue -eq $DesiredValue) {
-    Write-Host "Current value is $CurrentValue. Policy is compliant." -ForegroundColor Green
+}
+elseif ($CurrentValue -eq $DesiredValue) {
+    Write-Host "Value is Compliant ($CurrentValue - MPR Password Transmission is Disabled)." -ForegroundColor Green
     $Status = "COMPLIANT"
-} else {
-    Write-Host "Current value is $CurrentValue. Expected: $DesiredValue." -ForegroundColor Red
+}
+else {
+    Write-Host "Value is incorrect ($CurrentValue). MPR is sending user passwords!" -ForegroundColor Red
     $Status = "NON-COMPLIANT"
 }
 

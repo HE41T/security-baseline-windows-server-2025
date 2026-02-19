@@ -1,83 +1,103 @@
 # ==============================================================
 # CIS Check: 18.10.29.5 (L1) - Remediation Script
-# Description: Ensure 'Turn off shell protocol protected mode' is set to 'Disabled' (Automated)
-# Registry Path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer
+# Description: Ensure 'Turn off shell protocol protected mode' is set to 'Disabled'
+# GPO Path: Computer Configuration > Administrative Templates > Windows Components > File Explorer > Turn off shell protocol protected mode
+# Registry Path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\PreXPSP2ShellProtocolBehavior
 # ==============================================================
 
-$LogFile = "C:\Windows\Temp\remediate_18_10_29_5.log"
+$LogFile = "C:\Windows\Temp\remediate_shell_protocol_mode.log"
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$RegPath = "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer"
-$ValueName = "PreXPSP2ShellProtocolBehavior"
 $DesiredValue = 0
-$ValueType = "DWord"
+$RegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer"
+$ValueName = "PreXPSP2ShellProtocolBehavior"
 
 $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="
 Write-Host $StartMsg
-Write-Host "Control 18.10.29.5: Ensure 'Turn off shell protocol protected mode' is set to 'Disabled' (Automated)"
+Write-Host "Control 18.10.29.5: Ensure Shell Protocol Protected Mode is NOT Disabled"
 Write-Host "=============================================================="
 
 Add-Content -Path $LogFile -Value "`n=============================================================="
 Add-Content -Path $LogFile -Value $StartMsg
 
-function Get-PolicyValue {
+function Get-ShellProtoPolicyValue {
     try {
-        if (-not (Test-Path -Path $RegPath)) {
-            return $null
-        }
-        $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
-        if ($ValueType -eq "DWord") {
-            return [int]$Value
-        }
-        return [string]$Value
-    } catch {
-        return $null
+    # --- Auto-Generated LGPO Injection ---
+    $LgpoContent = @"
+Computer
+SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer
+PreXPSP2ShellProtocolBehavior
+DWORD:0
+"@
+    
+    $LgpoFile = "C:\Windows\Temp\lgpo_temp_$ValueName.txt"
+    Set-Content -Path $LgpoFile -Value $LgpoContent -Encoding Ascii
+
+    if (Test-Path "C:\Windows\Temp\LGPO.exe") {
+        & "C:\Windows\Temp\LGPO.exe" /q /t $LgpoFile | Out-Null
+        gpupdate /force | Out-Null
+        Write-Host "Success: Applied via LGPO.exe (GPO & Registry updated)" -ForegroundColor Green
+        Add-Content -Path $LogFile -Value "Status: COMPLIANT - Applied via LGPO"
+        $ExitCode = 0
+    } else {
+        Write-Host "[!] LGPO.exe not found! Applying to Registry only." -ForegroundColor Yellow
+        if (-not (Test-Path -Path "$RegPath")) { New-Item -Path "$RegPath" -Force | Out-Null }
+        Set-ItemProperty -Path "$RegPath" -Name "$ValueName" -Value $DesiredValue -Type DWord -Force
+        $ExitCode = 0
+    }
+
+    if (Test-Path $LgpoFile) { Remove-Item -Path $LgpoFile -Force }
+    # ---------------------------------------
+} catch {
+        return -1
     }
 }
 
-function Set-PolicyValue {
-    [CmdletBinding(SupportsShouldProcess=$true)]
-    param()
-    if (-not $PSCmdlet.ShouldProcess($RegPath, "Set $ValueName")) {
-        return
-    }
-    if (-not (Test-Path -Path $RegPath)) {
-        New-Item -Path $RegPath -Force | Out-Null
-    }
-    Set-ItemProperty -Path $RegPath -Name $ValueName -Value $DesiredValue -Type $ValueType -Force
-}
+$CurrentValue = Get-ShellProtoPolicyValue
 
-$CurrentValue = Get-PolicyValue
-
-if ($CurrentValue -eq $DesiredValue) {
-    $Msg = "Value is already $CurrentValue. No action needed."
-    Write-Host $Msg -ForegroundColor Green
-    Add-Content -Path $LogFile -Value $Msg
-    $Status = "COMPLIANT"
-} else {
-    $Msg = "Value is $CurrentValue. Setting to $DesiredValue."
+if ($CurrentValue -eq -1 -or $CurrentValue -ne $DesiredValue) {
+    $Msg = "Value is incorrect or missing. Fixing to $DesiredValue (Disabled)..."
     Write-Host $Msg -ForegroundColor Yellow
     Add-Content -Path $LogFile -Value $Msg
+
     try {
-        Set-PolicyValue
-        $NewValue = Get-PolicyValue
-        if ($NewValue -eq $DesiredValue) {
-            $ResultMsg = "Fixed. New value is $NewValue."
-            Write-Host $ResultMsg -ForegroundColor Green
-            Add-Content -Path $LogFile -Value $ResultMsg
-            $Status = "COMPLIANT"
-        } else {
-            $FailMsg = "Verification failed. Current value is $NewValue."
-            Write-Host $FailMsg -ForegroundColor Red
-            Add-Content -Path $LogFile -Value $FailMsg
-            $Status = "NON-COMPLIANT"
-        }
-    } catch {
+    # --- Auto-Generated LGPO Injection ---
+    $LgpoContent = @"
+Computer
+SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer
+PreXPSP2ShellProtocolBehavior
+DWORD:0
+"@
+    
+    $LgpoFile = "C:\Windows\Temp\lgpo_temp_$ValueName.txt"
+    Set-Content -Path $LgpoFile -Value $LgpoContent -Encoding Ascii
+
+    if (Test-Path "C:\Windows\Temp\LGPO.exe") {
+        & "C:\Windows\Temp\LGPO.exe" /q /t $LgpoFile | Out-Null
+        gpupdate /force | Out-Null
+        Write-Host "Success: Applied via LGPO.exe (GPO & Registry updated)" -ForegroundColor Green
+        Add-Content -Path $LogFile -Value "Status: COMPLIANT - Applied via LGPO"
+        $ExitCode = 0
+    } else {
+        Write-Host "[!] LGPO.exe not found! Applying to Registry only." -ForegroundColor Yellow
+        if (-not (Test-Path -Path "$RegPath")) { New-Item -Path "$RegPath" -Force | Out-Null }
+        Set-ItemProperty -Path "$RegPath" -Name "$ValueName" -Value $DesiredValue -Type DWord -Force
+        $ExitCode = 0
+    }
+
+    if (Test-Path $LgpoFile) { Remove-Item -Path $LgpoFile -Force }
+    # ---------------------------------------
+} catch {
         $ErrorMsg = "Failed to fix: $_"
         Write-Host $ErrorMsg -ForegroundColor Red
         Add-Content -Path $LogFile -Value $ErrorMsg
         $Status = "NON-COMPLIANT"
     }
+} else {
+    $Msg = "Value is already set to Disabled ($CurrentValue). No action required."
+    Write-Host $Msg -ForegroundColor Green
+    Add-Content -Path $LogFile -Value $Msg
+    $Status = "COMPLIANT"
 }
 
 Write-Host "=============================================================="

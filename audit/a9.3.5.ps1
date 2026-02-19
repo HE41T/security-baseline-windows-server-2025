@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 9.3.5 (L1) - Audit Script
-# Description: FW Public: Apply local ipsec
+# Description: Ensure 'Windows Firewall: Public: Settings: Apply local connection security rules' is set to 'No' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

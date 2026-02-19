@@ -1,14 +1,14 @@
 # ==============================================================
 # CIS Check: 18.10.15.1 (L1) - Remediation Script
 # Description: Ensure 'Do not display the password reveal button' is set to 'Enabled'
-# GPO Path: Computer Configuration > Administrative Templates > System > Logon > Do not display the password reveal button
-# Registry Path: HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\CredUI
+# GPO Path: Computer Configuration > Administrative Templates > Windows Components > Credential User Interface > Do not display the password reveal button
+# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredUI\DisablePasswordReveal
 # ==============================================================
 
-$LogFile = "C:\Windows\Temp\remediate_password_reveal_button.log"
+$LogFile = "C:\Windows\Temp\remediate_disable_password_reveal.log"
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 1
-$RegPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\CredUI"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredUI"
 $ValueName = "DisablePasswordReveal"
 
 $StartMsg = "Remediation started: $Date"
@@ -22,13 +22,33 @@ Add-Content -Path $LogFile -Value $StartMsg
 
 function Get-PasswordRevealValue {
     try {
-        if (-not (Test-Path -Path $RegPath)) {
-            return 0
-        }
+    # --- Auto-Generated LGPO Injection ---
+    $LgpoContent = @"
+Computer
+SOFTWARE\Policies\Microsoft\Windows\CredUI
+DisablePasswordReveal
+DWORD:1
+"@
+    
+    $LgpoFile = "C:\Windows\Temp\lgpo_temp_$ValueName.txt"
+    Set-Content -Path $LgpoFile -Value $LgpoContent -Encoding Ascii
 
-        $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
-        return [int]$Value
-    } catch {
+    if (Test-Path "C:\Windows\Temp\LGPO.exe") {
+        & "C:\Windows\Temp\LGPO.exe" /q /t $LgpoFile | Out-Null
+        gpupdate /force | Out-Null
+        Write-Host "Success: Applied via LGPO.exe (GPO & Registry updated)" -ForegroundColor Green
+        Add-Content -Path $LogFile -Value "Status: COMPLIANT - Applied via LGPO"
+        $ExitCode = 0
+    } else {
+        Write-Host "[!] LGPO.exe not found! Applying to Registry only." -ForegroundColor Yellow
+        if (-not (Test-Path -Path "$RegPath")) { New-Item -Path "$RegPath" -Force | Out-Null }
+        Set-ItemProperty -Path "$RegPath" -Name "$ValueName" -Value $DesiredValue -Type DWord -Force
+        $ExitCode = 0
+    }
+
+    if (Test-Path $LgpoFile) { Remove-Item -Path $LgpoFile -Force }
+    # ---------------------------------------
+} catch {
         return -1
     }
 }
@@ -36,44 +56,51 @@ function Get-PasswordRevealValue {
 $CurrentValue = Get-PasswordRevealValue
 
 if ($CurrentValue -eq -1) {
-    $Msg = "[!] Error: Cannot read registry value."
+    $Msg = "[!] Error: Unable to read the registry value."
     Write-Host $Msg -ForegroundColor Red
     Add-Content -Path $LogFile -Value $Msg
     $Status = "NON-COMPLIANT"
 }
-elseif ($CurrentValue -ne $DesiredValue) {
-    $Msg = "Value is $CurrentValue. Setting to $DesiredValue."
+elseif ($CurrentValue -lt $DesiredValue) {
+    $Msg = "Value is incorrect ($CurrentValue). Fixing..."
     Write-Host $Msg -ForegroundColor Yellow
     Add-Content -Path $LogFile -Value $Msg
 
     try {
-        if (-not (Test-Path -Path $RegPath)) {
-            New-Item -Path $RegPath -Force | Out-Null
-        }
+    # --- Auto-Generated LGPO Injection ---
+    $LgpoContent = @"
+Computer
+SOFTWARE\Policies\Microsoft\Windows\CredUI
+DisablePasswordReveal
+DWORD:1
+"@
+    
+    $LgpoFile = "C:\Windows\Temp\lgpo_temp_$ValueName.txt"
+    Set-Content -Path $LgpoFile -Value $LgpoContent -Encoding Ascii
 
-        Set-ItemProperty -Path $RegPath -Name $ValueName -Value $DesiredValue -Type DWord -Force
+    if (Test-Path "C:\Windows\Temp\LGPO.exe") {
+        & "C:\Windows\Temp\LGPO.exe" /q /t $LgpoFile | Out-Null
+        gpupdate /force | Out-Null
+        Write-Host "Success: Applied via LGPO.exe (GPO & Registry updated)" -ForegroundColor Green
+        Add-Content -Path $LogFile -Value "Status: COMPLIANT - Applied via LGPO"
+        $ExitCode = 0
+    } else {
+        Write-Host "[!] LGPO.exe not found! Applying to Registry only." -ForegroundColor Yellow
+        if (-not (Test-Path -Path "$RegPath")) { New-Item -Path "$RegPath" -Force | Out-Null }
+        Set-ItemProperty -Path "$RegPath" -Name "$ValueName" -Value $DesiredValue -Type DWord -Force
+        $ExitCode = 0
+    }
 
-        $NewValue = Get-PasswordRevealValue
-
-        if ($NewValue -eq $DesiredValue) {
-            $ResultMsg = "Fixed. New value is $NewValue."
-            Write-Host $ResultMsg -ForegroundColor Green
-            Add-Content -Path $LogFile -Value $ResultMsg
-            $Status = "COMPLIANT"
-        } else {
-            $FailMsg = "Verification failed. Current value is $NewValue."
-            Write-Host $FailMsg -ForegroundColor Red
-            Add-Content -Path $LogFile -Value $FailMsg
-            $Status = "NON-COMPLIANT"
-        }
-    } catch {
+    if (Test-Path $LgpoFile) { Remove-Item -Path $LgpoFile -Force }
+    # ---------------------------------------
+} catch {
         $ErrorMsg = "Failed to fix: $_"
         Write-Host $ErrorMsg -ForegroundColor Red
         Add-Content -Path $LogFile -Value $ErrorMsg
         $Status = "NON-COMPLIANT"
     }
 } else {
-    $Msg = "Value is already $CurrentValue. No action needed."
+    $Msg = "Value is already Enabled ($CurrentValue). No action required."
     Write-Host $Msg -ForegroundColor Green
     Add-Content -Path $LogFile -Value $Msg
     $Status = "COMPLIANT"

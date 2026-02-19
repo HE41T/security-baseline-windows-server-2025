@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 2.2.31 (L1) - Audit Script (Standardized)
-# Description: Ensure 'Generate security audits' is set to Local Service & Network Service
+# Description: Ensure 'Generate security audits' is set to 'LOCAL SERVICE, NETWORK SERVICE' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
@@ -9,7 +9,7 @@ $DesiredSids = @("S-1-5-19", "S-1-5-20")
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 2.2.31: Generate security audits"
+Write-Host "Control 2.2.31: Ensure 'Generate security audits' is set to 'LOCAL SERVICE, NETWORK SERVICE' (Automated)"
 Write-Host "=============================================================="
 
 $Privilege = "SeAuditPrivilege"

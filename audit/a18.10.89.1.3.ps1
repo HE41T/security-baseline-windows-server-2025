@@ -1,46 +1,43 @@
 # ==============================================================
 # CIS Check: 18.10.89.1.3 (L1) - Audit Script
-# Description: Ensure 'Disallow Digest authentication' is set to 'Enabled' (Automated)
-# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client
+# Description: Ensure 'Disallow Digest authentication' for WinRM Client is set to 'Enabled'
+# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client\AllowDigest
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$RegPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\WinRM\\Client"
-$ValueName = "AllowDigest"
 $DesiredValue = 0
-$ValueType = "DWord"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Client"
+$ValueName = "AllowDigest"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 18.10.89.1.3: Ensure 'Disallow Digest authentication' is set to 'Enabled' (Automated)"
+Write-Host "Control 18.10.89.1.3: Check WinRM Client Digest Auth Status"
 Write-Host "=============================================================="
 
-function Get-PolicyValue {
+function Get-WinRMDigestStatus {
     try {
         if (-not (Test-Path -Path $RegPath)) {
             return $null
         }
         $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
-        if ($ValueType -eq "DWord") {
-            return [int]$Value
-        }
-        return [string]$Value
+        return [int]$Value
     } catch {
-        Write-Host "[!] Failed reading registry value: $_" -ForegroundColor Yellow
         return $null
     }
 }
 
-$CurrentValue = Get-PolicyValue
+$CurrentValue = Get-WinRMDigestStatus
 
 if ($null -eq $CurrentValue) {
-    Write-Host "[!] Unable to determine current setting." -ForegroundColor Yellow
+    Write-Host "[!] Value is NOT configured via GPO (Default is Allowed)." -ForegroundColor Yellow
     $Status = "NON-COMPLIANT"
-} elseif ($CurrentValue -eq $DesiredValue) {
-    Write-Host "Current value is $CurrentValue. Policy is compliant." -ForegroundColor Green
+}
+elseif ($CurrentValue -eq $DesiredValue) {
+    Write-Host "Value is Compliant ($CurrentValue - Digest Auth is Disabled)." -ForegroundColor Green
     $Status = "COMPLIANT"
-} else {
-    Write-Host "Current value is $CurrentValue. Expected: $DesiredValue." -ForegroundColor Red
+}
+else {
+    Write-Host "Value is incorrect ($CurrentValue). WinRM Client is ALLOWING Digest Auth!" -ForegroundColor Red
     $Status = "NON-COMPLIANT"
 }
 

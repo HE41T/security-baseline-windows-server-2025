@@ -1,9 +1,8 @@
 # ==============================================================
 # CIS Check: 1.1.1 (L1) - Remediation Script
-# Description: Ensure 'Enforce password history' is set to '24 or more password(s)'
+# Description: Ensure 'Enforce password history' is set to '24 or more password(s)' (Automated)
 # ==============================================================
 
-$LogFile = "C:\Windows\Temp\remediate_password_history.log"
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 24
 
@@ -13,8 +12,6 @@ Write-Host $StartMsg
 Write-Host "Control 1.1.1: Ensure 'Enforce password history' is >= $DesiredValue"
 Write-Host "=============================================================="
 
-Add-Content -Path $LogFile -Value "`n=============================================================="
-Add-Content -Path $LogFile -Value "$StartMsg"
 
 # 1. ฟังก์ชันสำหรับอ่านค่าปัจจุบัน (Reusable)
 function Get-PasswordHistory {
@@ -37,14 +34,12 @@ $CurrentValue = Get-PasswordHistory
 if ($CurrentValue -eq -1) {
     $Msg = "[!] Error: Could not read current password policy."
     Write-Host $Msg -ForegroundColor Red
-    Add-Content -Path $LogFile -Value $Msg
-    $Status = "NON-COMPLIANT"
+        $Status = "NON-COMPLIANT"
 }
 elseif ($CurrentValue -lt $DesiredValue) {
     $Msg = "Value is incorrect ($CurrentValue). Fixing..."
     Write-Host $Msg -ForegroundColor Yellow
-    Add-Content -Path $LogFile -Value $Msg
-    
+        
     try {
         # แก้ไขโดยใช้ Native Command
         # /uniquepw คือ parameter สำหรับ Enforce password history
@@ -57,13 +52,11 @@ elseif ($CurrentValue -lt $DesiredValue) {
             if ($NewValue -ge $DesiredValue) {
                 $ResultMsg = "Fixed. New value is $NewValue."
                 Write-Host $ResultMsg -ForegroundColor Green
-                Add-Content -Path $LogFile -Value $ResultMsg
-                $Status = "COMPLIANT"
+                                $Status = "COMPLIANT"
             } else {
                 $FailMsg = "Verification failed. Value remains $NewValue"
                 Write-Host $FailMsg -ForegroundColor Red
-                Add-Content -Path $LogFile -Value $FailMsg
-                $Status = "NON-COMPLIANT"
+                                $Status = "NON-COMPLIANT"
             }
         } else {
             throw "Net accounts command failed with exit code $($Proc.ExitCode)"
@@ -72,22 +65,18 @@ elseif ($CurrentValue -lt $DesiredValue) {
     } catch {
         $ErrorMsg = "Failed to fix: $_"
         Write-Host $ErrorMsg -ForegroundColor Red
-        Add-Content -Path $LogFile -Value $ErrorMsg
-        $Status = "NON-COMPLIANT"
+                $Status = "NON-COMPLIANT"
     }
 
 } else {
     $Msg = "Value is correct ($CurrentValue). No action needed."
     Write-Host $Msg -ForegroundColor Green
-    Add-Content -Path $LogFile -Value $Msg
-    $Status = "COMPLIANT"
+        $Status = "COMPLIANT"
 }
 
 Write-Host "=============================================================="
 Write-Host "Remediation completed at $(Get-Date)"
 Write-Host "Final Status: $Status"
 Write-Host "=============================================================="
-Add-Content -Path $LogFile -Value "Final Status: $Status"
-Add-Content -Path $LogFile -Value "=============================================================="
 
 if ($Status -eq "COMPLIANT") { exit 0 } else { exit 1 }

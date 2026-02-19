@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 17.9.4 (L1) - Audit Script
-# Description: Audit Security System Extension
+# Description: Ensure 'Audit Security System Extension' is set to include 'Success' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

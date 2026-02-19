@@ -1,9 +1,8 @@
 # ==============================================================
 # CIS Check: 1.1.6 (L1) - Remediation Script
-# Description: Ensure 'Relax minimum password length limits' is set to 'Enabled'
+# Description: Ensure 'Relax minimum password length limits' is set to 'Enabled' (Automated)
 # ==============================================================
 
-$LogFile = "C:\Windows\Temp\remediate_relax_pw_limits.log"
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 1
 
@@ -13,8 +12,6 @@ Write-Host $StartMsg
 Write-Host "Control 1.1.6: Ensure 'Relax minimum password length limits' is Enabled"
 Write-Host "=============================================================="
 
-Add-Content -Path $LogFile -Value "`n=============================================================="
-Add-Content -Path $LogFile -Value "$StartMsg"
 
 function Get-RelaxLimit {
     $RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SAM"
@@ -33,13 +30,11 @@ $CurrentValue = Get-RelaxLimit
 if ($CurrentValue -eq $DesiredValue) {
     $Msg = "Value is correct ($CurrentValue). No action needed."
     Write-Host $Msg -ForegroundColor Green
-    Add-Content -Path $LogFile -Value $Msg
-    $Status = "COMPLIANT"
+        $Status = "COMPLIANT"
 } else {
     $Msg = "Value is incorrect ($CurrentValue). Fixing..."
     Write-Host $Msg -ForegroundColor Yellow
-    Add-Content -Path $LogFile -Value $Msg
-
+    
     try {
         $RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SAM"
         if (-not (Test-Path $RegPath)) { New-Item -Path $RegPath -Force | Out-Null }
@@ -50,19 +45,16 @@ if ($CurrentValue -eq $DesiredValue) {
         if ($NewValue -eq $DesiredValue) {
              $ResultMsg = "Fixed. New value is $NewValue."
              Write-Host $ResultMsg -ForegroundColor Green
-             Add-Content -Path $LogFile -Value $ResultMsg
-             $Status = "COMPLIANT"
+                          $Status = "COMPLIANT"
         } else {
              $FailMsg = "Verification failed. Value remains $NewValue"
              Write-Host $FailMsg -ForegroundColor Red
-             Add-Content -Path $LogFile -Value $FailMsg
-             $Status = "NON-COMPLIANT"
+                          $Status = "NON-COMPLIANT"
         }
     } catch {
         $ErrorMsg = "Failed to fix: $_"
         Write-Host $ErrorMsg -ForegroundColor Red
-        Add-Content -Path $LogFile -Value $ErrorMsg
-        $Status = "NON-COMPLIANT"
+                $Status = "NON-COMPLIANT"
     }
 }
 
@@ -70,7 +62,5 @@ Write-Host "=============================================================="
 Write-Host "Remediation completed at $(Get-Date)"
 Write-Host "Final Status: $Status"
 Write-Host "=============================================================="
-Add-Content -Path $LogFile -Value "Final Status: $Status"
-Add-Content -Path $LogFile -Value "=============================================================="
 
 if ($Status -eq "COMPLIANT") { exit 0 } else { exit 1 }

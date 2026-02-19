@@ -36,3 +36,6 @@ Thumbs.db
 # Config ที่เป็นความลับ
 configs/hosts.json
 configs/cis_config.py
+*.pdf
+*.csv
+*.rar

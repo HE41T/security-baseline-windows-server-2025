@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 2.3.2.1 (L1) - Audit Script
-# Description: Audit: Force audit policy subcategory settings...
+# Description: Ensure 'Audit: Force audit policy subcategory settings (Windows Vista or later) to override audit policy category settings' is set to 'Enabled' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

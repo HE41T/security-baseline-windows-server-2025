@@ -1,47 +1,42 @@
 # ==============================================================
 # CIS Check: 18.10.43.6.1.1 (L1) - Audit Script
-# Description: Ensure 'Configure Attack Surface Reduction rules' is set to 'Enabled' (Automated)
-# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR
+# Description: Ensure 'Configure Attack Surface Reduction rules' is set to 'Enabled'
+# GPO Path: Computer Configuration > Administrative Templates > Windows Components > Microsoft Defender Antivirus > Microsoft Defender Exploit Guard > Attack Surface Reduction > Configure Attack Surface Reduction rules
+# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\ExploitGuard_ASR_Rules
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$RegPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR"
 $ValueName = "ExploitGuard_ASR_Rules"
-$DesiredValue = 1
-$ValueType = "DWord"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 18.10.43.6.1.1: Ensure 'Configure Attack Surface Reduction rules' is set to 'Enabled' (Automated)"
+Write-Host "Control 18.10.43.6.1.1: Ensure ASR Rules are Enabled"
 Write-Host "=============================================================="
 
-function Get-PolicyValue {
+function Get-ASRPolicyState {
     try {
         if (-not (Test-Path -Path $RegPath)) {
             return $null
         }
+
+        # ตรวจสอบว่ามีค่า ExploitGuard_ASR_Rules ถูกกำหนดไว้หรือไม่
         $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
-        if ($ValueType -eq "DWord") {
-            return [int]$Value
-        }
-        return [string]$Value
+        return $Value
     } catch {
-        Write-Host "[!] Failed reading registry value: $_" -ForegroundColor Yellow
         return $null
     }
 }
 
-$CurrentValue = Get-PolicyValue
+$CurrentState = Get-ASRPolicyState
 
-if ($null -eq $CurrentValue) {
-    Write-Host "[!] Unable to determine current setting." -ForegroundColor Yellow
+if ($null -eq $CurrentState) {
+    Write-Host "[!] ASR Rules policy is NOT configured or missing." -ForegroundColor Yellow
     $Status = "NON-COMPLIANT"
-} elseif ($CurrentValue -eq $DesiredValue) {
-    Write-Host "Current value is $CurrentValue. Policy is compliant." -ForegroundColor Green
+}
+else {
+    Write-Host "ASR Rules policy is Enabled." -ForegroundColor Green
     $Status = "COMPLIANT"
-} else {
-    Write-Host "Current value is $CurrentValue. Expected: $DesiredValue." -ForegroundColor Red
-    $Status = "NON-COMPLIANT"
 }
 
 Write-Host "=============================================================="

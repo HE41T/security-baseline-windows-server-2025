@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 17.7.3 (L1) - Audit Script
-# Description: Audit Authorization Policy Change
+# Description: Ensure 'Audit Authorization Policy Change' is set to include 'Success' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

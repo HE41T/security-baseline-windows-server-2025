@@ -1,54 +1,44 @@
 # ==============================================================
 # CIS Check: 19.7.26.1 (L1) - Audit Script
-# Description: Ensure 'Prevent users from sharing files within their profile.' is set to 'Enabled' (Automated)
-# Verification: Iterate through HKU user hives to confirm the setting
+# Description: Ensure 'Prevent users from sharing files within their profile.' is set to 'Enabled'
+# Registry Path: HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\NoInplaceSharing
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$ValueName = "NoInplaceSharing"
 $DesiredValue = 1
+$RegPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer"
+$ValueName = "NoInplaceSharing"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 19.7.26.1: Ensure 'Prevent users from sharing files within their profile.' is set to 'Enabled' (Automated)"
+Write-Host "Control 19.7.26.1: Check User Profile File Sharing Status"
 Write-Host "=============================================================="
 
-$Status = "COMPLIANT"
-$NonCompliant = @()
-$Sids = Get-ChildItem HKU:\ | Where-Object { $_.PSChildName -match '^S-1-5-21-' }
-if (-not $Sids) {
-    Write-Host "No user hives were detected under HKU:\" -ForegroundColor Yellow
-    $Status = "NON-COMPLIANT"
-}
-else {
-    foreach ($Sid in $Sids) {
-        $RegistryPath = Join-Path "HKU:\$($Sid.PSChildName)" "Software\Microsoft\Windows\CurrentVersion\Policies\Explorer"
-        if (-not (Test-Path -Path $RegistryPath)) {
-            Write-Host "[!] Missing key for $($Sid.PSChildName): $RegistryPath" -ForegroundColor Yellow
-            $NonCompliant += "$($Sid.PSChildName) (missing key)"
-            $Status = "NON-COMPLIANT"
-            continue
+function Get-InplaceSharingStatus {
+    try {
+        if (-not (Test-Path -Path $RegPath)) {
+            return $null
         }
-        try {
-            $Value = Get-ItemPropertyValue -Path $RegistryPath -Name $ValueName -ErrorAction Stop
-        } catch {
-            Write-Host "[!] Could not read $ValueName for $($Sid.PSChildName)." -ForegroundColor Yellow
-            $NonCompliant += "$($Sid.PSChildName) (missing value)"
-            $Status = "NON-COMPLIANT"
-            continue
-        }
-        if ([int]$Value -ne $DesiredValue) {
-            Write-Host "[!] $($Sid.PSChildName): Current value is $Value, expected $DesiredValue." -ForegroundColor Red
-            $NonCompliant += "$($Sid.PSChildName) (value $Value)"
-            $Status = "NON-COMPLIANT"
-        } else {
-            Write-Host "$($Sid.PSChildName): Value is $Value." -ForegroundColor Green
-        }
+        $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
+        return [int]$Value
+    } catch {
+        return $null
     }
 }
 
-if ($NonCompliant.Count -gt 0) {
-    Write-Host "Non-compliant SIDs: $($NonCompliant -join ', ')" -ForegroundColor Red
+$CurrentValue = Get-InplaceSharingStatus
+
+if ($null -eq $CurrentValue) {
+    Write-Host "[!] Value is NOT configured via GPO (Default allows sharing)." -ForegroundColor Yellow
+    $Status = "NON-COMPLIANT"
+}
+elseif ($CurrentValue -eq $DesiredValue) {
+    Write-Host "Value is Compliant ($CurrentValue - Profile sharing is PREVENTED)." -ForegroundColor Green
+    $Status = "COMPLIANT"
+}
+else {
+    Write-Host "Value is incorrect ($CurrentValue). Users can STILL share files from their profile!" -ForegroundColor Red
+    $Status = "NON-COMPLIANT"
 }
 
 Write-Host "=============================================================="

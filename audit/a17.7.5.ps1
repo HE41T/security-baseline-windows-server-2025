@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 17.7.5 (L1) - Audit Script
-# Description: Audit Other Policy Change Events
+# Description: Ensure 'Audit Other Policy Change Events' is set to include 'Failure' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

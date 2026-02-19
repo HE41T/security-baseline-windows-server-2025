@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 1.1.2 (L1) - Audit Script
-# Description: Ensure 'Maximum password age' is set to '365 or fewer days, but not 0'
+# Description: Ensure 'Maximum password age' is set to '365 or fewer days, but not 0' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

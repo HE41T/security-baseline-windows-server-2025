@@ -1,46 +1,43 @@
 # ==============================================================
 # CIS Check: 18.10.57.3.9.3 (L1) - Audit Script
-# Description: Ensure 'Require use of specific security layer for remote (RDP) connections' is set to 'Enabled: SSL' (Automated)
-# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services
+# Description: Ensure 'Require use of specific security layer for remote (RDP) connections' is set to 'Enabled: SSL'
+# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services\SecurityLayer
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$RegPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services"
-$ValueName = "SecurityLayer"
 $DesiredValue = 2
-$ValueType = "DWord"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
+$ValueName = "SecurityLayer"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 18.10.57.3.9.3: Ensure 'Require use of specific security layer for remote (RDP) connections' is set to 'Enabled: SSL' (Automated)"
+Write-Host "Control 18.10.57.3.9.3: Check RDP Security Layer (SSL/TLS)"
 Write-Host "=============================================================="
 
-function Get-PolicyValue {
+function Get-SecurityLayerValue {
     try {
         if (-not (Test-Path -Path $RegPath)) {
             return $null
         }
         $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
-        if ($ValueType -eq "DWord") {
-            return [int]$Value
-        }
-        return [string]$Value
+        return [int]$Value
     } catch {
-        Write-Host "[!] Failed reading registry value: $_" -ForegroundColor Yellow
         return $null
     }
 }
 
-$CurrentValue = Get-PolicyValue
+$CurrentValue = Get-SecurityLayerValue
 
 if ($null -eq $CurrentValue) {
-    Write-Host "[!] Unable to determine current setting." -ForegroundColor Yellow
+    Write-Host "[!] Value is NOT configured (Default: Negotiate)." -ForegroundColor Yellow
     $Status = "NON-COMPLIANT"
-} elseif ($CurrentValue -eq $DesiredValue) {
-    Write-Host "Current value is $CurrentValue. Policy is compliant." -ForegroundColor Green
+}
+elseif ($CurrentValue -eq $DesiredValue) {
+    Write-Host "Value is Compliant ($CurrentValue - SSL/TLS Required)." -ForegroundColor Green
     $Status = "COMPLIANT"
-} else {
-    Write-Host "Current value is $CurrentValue. Expected: $DesiredValue." -ForegroundColor Red
+}
+else {
+    Write-Host "Value is incorrect ($CurrentValue). Expected: $DesiredValue (SSL)." -ForegroundColor Red
     $Status = "NON-COMPLIANT"
 }
 

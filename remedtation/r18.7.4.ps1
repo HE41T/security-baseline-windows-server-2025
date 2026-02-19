@@ -1,23 +1,23 @@
 ﻿# ==============================================================
 # CIS Check: 18.7.4 (L1) - Remediation Script
-# Description: Ensure 18.7.4 ClientAuthenticationLevel is set to 1
+# Description: Ensure 'Configure RPC connection settings: Use authentication for outgoing RPC connections' is set to 'Enabled: Default'
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$DesiredValue = 1
-$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Rpc"
-$RegName = "ClientAuthenticationLevel"
+$DesiredValue = 0
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers\RPC"
+$RegName = "RpcAuthentication"
 
 $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="
 Write-Host $StartMsg
-Write-Host "Control 18.7.4: Set $RegName to $DesiredValue"
+Write-Host "Control 18.7.4: Set $RegName to $DesiredValue (Enabled: Default)"
 Write-Host "=============================================================="
 
 function Get-RegistryValue {
     try {
         $RegData = Get-ItemProperty -Path $RegPath -Name $RegName -ErrorAction SilentlyContinue
-        if ($RegData -and $RegData.$RegName -ne $null) { return $RegData.$RegName }
+        if ($null -ne $RegData -and $null -ne $RegData.$RegName) { return [int]$RegData.$RegName }
         return $null
     } catch { return $null }
 }
@@ -31,7 +31,7 @@ if ($null -eq $CurrentValue -or $CurrentValue -ne $DesiredValue) {
     try {
         if (!(Test-Path $RegPath)) { New-Item -Path $RegPath -Force | Out-Null }
         
-        # เนเธเนเนเธเธเนเธฒ Registry
+        # ตั้งค่า Registry ให้ตรงตาม CIS
         Set-ItemProperty -Path $RegPath -Name $RegName -Value $DesiredValue -Type DWord -Force
         
         $NewValue = Get-RegistryValue

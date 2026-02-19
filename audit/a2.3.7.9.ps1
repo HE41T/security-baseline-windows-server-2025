@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 2.3.7.9 (L1) - Audit Script
-# Description: Smart card removal behavior
+# Description: Ensure 'Interactive logon: Smart card removal behavior' is set to 'Lock Workstation' or higher (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

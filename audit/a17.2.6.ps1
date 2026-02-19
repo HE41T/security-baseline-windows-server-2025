@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 17.2.6 (L1) - Audit Script
-# Description: Audit User Account Management
+# Description: Ensure 'Audit User Account Management' is set to 'Success and Failure' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

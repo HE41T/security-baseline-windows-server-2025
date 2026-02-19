@@ -1,12 +1,12 @@
 ﻿# ==============================================================
 # CIS Check: 18.6.7.1 (L1) - Audit Script
-# Description: Ensure 18.6.7.1 AuditServerDoesNotSupportEncryption is set to 1
+# Description: Ensure 18.6.7.1 AuditClientDoesNotSupportEncryption is set to 1
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 1
-$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters"
-$RegName = "AuditServerDoesNotSupportEncryption"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\LanmanServer"
+$RegName = "AuditClientDoesNotSupportEncryption"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"

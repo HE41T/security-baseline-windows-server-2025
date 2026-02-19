@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 2.3.7.3 (L1) - Audit Script
-# Description: Interactive logon: Machine inactivity limit (<=900)
+# Description: Ensure 'Interactive logon: Machine inactivity limit' is set to '900 or fewer second(s), but not 0' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

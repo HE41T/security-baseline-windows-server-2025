@@ -1,12 +1,12 @@
 ﻿# ==============================================================
 # CIS Check: 18.7.8 (L1) - Audit Script
-# Description: Ensure 18.7.8 EnableRpcPrivacy is set to 1
+# Description: Ensure 18.7.8 RpcAuthnLevelPrivacyEnabled is set to 1
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 1
-$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Rpc"
-$RegName = "EnableRpcPrivacy"
+$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Print"
+$RegName = "RpcAuthnLevelPrivacyEnabled"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"

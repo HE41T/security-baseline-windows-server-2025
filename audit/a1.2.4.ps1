@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 1.2.4 (L1) - Audit Script
-# Description: Ensure 'Reset account lockout counter after' is set to '15 or more minute(s)'
+# Description: Ensure 'Reset account lockout counter after' is set to '15 or more minute(s)' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

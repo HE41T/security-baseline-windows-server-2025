@@ -1,69 +1,53 @@
 # ==============================================================
 # CIS Check: 19.7.44.1 (L1) - Remediation Script
-# Description: Ensure 'Always install with elevated privileges' is set to 'Disabled' (Automated)
-# Instructions: Set the per-user registry key under each loaded HKU hive
+# Description: Set 'Always install with elevated privileges' (User) to 'Disabled' (0)
 # ==============================================================
 
-$LogFile = "C:\\Windows\\Temp\\remediate_19.7.44.1.log"
+$LogFile = "$env:TEMP\remediate_msi_user_elevation.log"
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$SubPath = "Software\Policies\Microsoft\Windows\Installer"
-$ValueName = "AlwaysInstallElevated"
 $DesiredValue = 0
+$RegPath = "HKCU:\Software\Policies\Microsoft\Windows\Installer"
+$ValueName = "AlwaysInstallElevated"
 
-$StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="
-Write-Host $StartMsg
-Write-Host "Control 19.7.44.1: Ensure 'Always install with elevated privileges' is set to 'Disabled' (Automated)"
+Write-Host "Remediation started: $Date"
+Write-Host "Disabling 'Always install with elevated privileges' for User (Registry: 0)"
 Write-Host "=============================================================="
 
-Add-Content -Path $LogFile -Value "`n=============================================================="
-Add-Content -Path $LogFile -Value $StartMsg
+Add-Content -Path $LogFile -Value "Remediation started: $Date"
 
-function Set-UserValue {
-    [CmdletBinding(SupportsShouldProcess=$true)]
-    [OutputType([int])]
-    param(
-        [Parameter(Mandatory=$true)]
-        $Sid
-    )
-    $RegRoot = Join-Path "HKU:\$($Sid.PSChildName)" "$SubPath"
-    if (-not $PSCmdlet.ShouldProcess($RegRoot, "Set $ValueName")) {
-        return $null
-    }
-    if (-not (Test-Path -Path $RegRoot)) {
-        New-Item -Path $RegRoot -Force | Out-Null
-    }
-    Set-ItemProperty -Path $RegRoot -Name $ValueName -Value $DesiredValue -Type DWord -Force
-    try {
-        $Current = Get-ItemPropertyValue -Path $RegRoot -Name $ValueName -ErrorAction Stop
-        return [int]$Current
-    } catch {
-        return $null
-    }
-}
+try {
+    # --- Auto-Generated LGPO Injection ---
+    $LgpoContent = @"
+User
+Software\Policies\Microsoft\Windows\Installer
+AlwaysInstallElevated
+DWORD:0
+"@
+    
+    $LgpoFile = "C:\Windows\Temp\lgpo_temp_$ValueName.txt"
+    Set-Content -Path $LgpoFile -Value $LgpoContent -Encoding Ascii
 
-$Status = "COMPLIANT"
-$Sids = Get-ChildItem HKU:\ | Where-Object { $_.PSChildName -match '^S-1-5-21-' }
-if (-not $Sids) {
-    $Msg = "No user hives found under HKU:\"; Write-Host $Msg -ForegroundColor Yellow; Add-Content -Path $LogFile -Value $Msg
-    $Status = "NON-COMPLIANT"
-} else {
-    foreach ($Sid in $Sids) {
-        $NewValue = Set-UserValue -Sid $Sid
-        if ($NewValue -eq $DesiredValue) {
-            $Msg = "$($Sid.PSChildName): Set to $NewValue."; Write-Host $Msg -ForegroundColor Green; Add-Content -Path $LogFile -Value $Msg
-        } else {
-            $Msg = "$($Sid.PSChildName): Failed to set value (current $NewValue)."; Write-Host $Msg -ForegroundColor Red; Add-Content -Path $LogFile -Value $Msg
-            $Status = "NON-COMPLIANT"
-        }
+    if (Test-Path "C:\Windows\Temp\LGPO.exe") {
+        & "C:\Windows\Temp\LGPO.exe" /q /t $LgpoFile | Out-Null
+        gpupdate /force | Out-Null
+        Write-Host "Success: Applied via LGPO.exe (GPO & Registry updated)" -ForegroundColor Green
+        Add-Content -Path $LogFile -Value "Status: COMPLIANT - Applied via LGPO"
+        $ExitCode = 0
+    } else {
+        Write-Host "[!] LGPO.exe not found! Applying to Registry only." -ForegroundColor Yellow
+        if (-not (Test-Path -Path "$RegPath")) { New-Item -Path "$RegPath" -Force | Out-Null }
+        Set-ItemProperty -Path "$RegPath" -Name "$ValueName" -Value $DesiredValue -Type DWord -Force
+        $ExitCode = 0
     }
+
+    if (Test-Path $LgpoFile) { Remove-Item -Path $LgpoFile -Force }
+    # ---------------------------------------
+} catch {
+    Write-Host "Error: Failed to set registry value. $_" -ForegroundColor Red
+    Add-Content -Path $LogFile -Value "Status: FAILED - $_"
+    $ExitCode = 1
 }
 
 Write-Host "=============================================================="
-Write-Host "Remediation completed at $(Get-Date)"
-Write-Host "Final Status: $Status"
-Write-Host "=============================================================="
-Add-Content -Path $LogFile -Value "Final Status: $Status"
-Add-Content -Path $LogFile -Value "=============================================================="
-
-if ($Status -eq "COMPLIANT") { exit 0 } else { exit 1 }
+exit $ExitCode

@@ -1,48 +1,44 @@
 # ==============================================================
 # CIS Check: 18.10.43.11.1.1.2 (L1) - Audit Script
-# Description: Ensure 'Configure Remote Encryption Protection Mode' is set to 'Enabled: Audit' or higher (Automated)
+# Description: Ensure 'Configure Remote Encryption Protection Mode' (Brute-Force Protection) is set to 'Enabled: Audit' (2) or 'Block' (1)
+# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection\BruteForceProtectionConfiguredState
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$Subcategory = "Configure Remote Encryption Protection Mode"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Remediation\Behavioral Network Blocks\Brute Force Protection"
+$ValueName = "BruteForceProtectionConfiguredState"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 18.10.43.11.1.1.2: Ensure '$Subcategory' Success and Failure auditing are enabled"
+Write-Host "Control 18.10.43.11.1.1.2: Check Brute-Force Protection State"
 Write-Host "=============================================================="
 
-function Get-AuditValues {
-    $result = @{}
+function Get-BruteForceProtValue {
     try {
-        $output = auditpol /get /subcategory:"$Subcategory" 2>$null
-        if ($LASTEXITCODE -ne 0) {
+        if (-not (Test-Path -Path $RegPath)) {
             return $null
         }
-        foreach ($line in $output) {
-            $successMatch = [regex]::Match($line, 'Success\s*:\s*(\w+)')
-            if ($successMatch.Success) {
-                $result.Success = $successMatch.Groups[1].Value
-            }
-            $failureMatch = [regex]::Match($line, 'Failure\s*:\s*(\w+)')
-            if ($failureMatch.Success) {
-                $result.Failure = $failureMatch.Groups[1].Value
-            }
-        }
+        $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
+        return [int]$Value
     } catch {
         return $null
     }
-    return $result
 }
 
-$Status = "NON-COMPLIANT"
-$Values = Get-AuditValues
-if ($null -eq $Values -or -not $Values.Success -or -not $Values.Failure) {
-    Write-Host "Unable to retrieve audit settings for '$Subcategory'." -ForegroundColor Yellow
-} elseif ($Values.Success.Trim().ToLower() -eq "enable" -and $Values.Failure.Trim().ToLower() -eq "enable") {
-    Write-Host "Success and Failure auditing are both set to Enable." -ForegroundColor Green
+$CurrentValue = Get-BruteForceProtValue
+
+if ($null -eq $CurrentValue) {
+    Write-Host "[!] Value is NOT configured." -ForegroundColor Yellow
+    $Status = "NON-COMPLIANT"
+}
+elseif ($CurrentValue -eq 1 -or $CurrentValue -eq 2) {
+    $Mode = if ($CurrentValue -eq 1) { "Block" } else { "Audit" }
+    Write-Host "Value is Compliant ($CurrentValue - $Mode)." -ForegroundColor Green
     $Status = "COMPLIANT"
-} else {
-    Write-Host "Current settings do not both equal Enable (Success: $($Values.Success); Failure: $($Values.Failure))." -ForegroundColor Red
+}
+else {
+    Write-Host "Value is incorrect ($CurrentValue). Expected 1 (Block) or 2 (Audit)." -ForegroundColor Red
+    $Status = "NON-COMPLIANT"
 }
 
 Write-Host "=============================================================="

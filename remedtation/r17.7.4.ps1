@@ -1,9 +1,8 @@
 # ==============================================================
 # CIS Check: 17.7.4 (L1) - Remediation Script
-# Description: Audit MPSSVC Rule-Level Policy Change
+# Description: Ensure 'Audit MPSSVC Rule-Level Policy Change' is set to 'Success and Failure' (Automated)
 # ==============================================================
 
-$LogFile = "C:\Windows\Temp\remediate_17_7_4.log"
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
 $StartMsg = "Remediation started: $Date"
@@ -12,8 +11,6 @@ Write-Host $StartMsg
 Write-Host "Control 17.7.4: Audit MPSSVC Rule-Level Policy Change"
 Write-Host "=============================================================="
 
-Add-Content -Path $LogFile -Value "`n=============================================================="
-Add-Content -Path $LogFile -Value "$StartMsg"
 
 
 $Subcat = "MPSSVC Rule-Level Policy Change"
@@ -26,8 +23,7 @@ try {
     
     $Msg = "Set audit policy for $Subcat"
     Write-Host $Msg -ForegroundColor Green
-    Add-Content -Path $LogFile -Value $Msg
-    $Status = "COMPLIANT"
+        $Status = "COMPLIANT"
 } catch {
     $Status = "NON-COMPLIANT"
 }
@@ -36,6 +32,4 @@ Write-Host "=============================================================="
 Write-Host "Remediation completed at $(Get-Date)"
 Write-Host "Final Status: $Status"
 Write-Host "=============================================================="
-Add-Content -Path $LogFile -Value "Final Status: $Status"
-Add-Content -Path $LogFile -Value "=============================================================="
 if ($Status -eq "COMPLIANT") { exit 0 } else { exit 1 }

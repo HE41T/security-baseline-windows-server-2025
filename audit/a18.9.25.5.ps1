@@ -5,7 +5,7 @@
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 15
-$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft Services\AdmPwd"
+$RegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\LAPS"
 $RegName = "PasswordLength"
 
 Write-Host "=============================================================="

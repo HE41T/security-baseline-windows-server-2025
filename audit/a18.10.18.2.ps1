@@ -1,44 +1,46 @@
 # ==============================================================
 # CIS Check: 18.10.18.2 (L1) - Audit Script
 # Description: Ensure 'Enable App Installer Experimental Features' is set to 'Disabled'
-# GPO Path: Computer Configuration > Administrative Templates > Windows Components > App Installer > Enable App Installer Experimental Features
-# Registry Path: HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\AppInstaller
+# GPO Path: Computer Configuration > Administrative Templates > Windows Components > Desktop App Installer > Enable App Installer Experimental Features
+# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller\EnableExperimentalFeatures
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$RegPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\AppInstaller"
-$ValueName = "EnableExperimentalFeatures"
 $DesiredValue = 0
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppInstaller"
+$ValueName = "EnableExperimentalFeatures"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
 Write-Host "Control 18.10.18.2: Ensure 'Enable App Installer Experimental Features' is Disabled"
 Write-Host "=============================================================="
 
-function Get-ExperimentalFeaturesValue {
+function Get-AppInstallerExperimentalFeaturesValue {
     try {
         if (-not (Test-Path -Path $RegPath)) {
-            return 1
+            return $null # ถือว่าไม่ผ่านหากไม่มีการตั้งค่านโยบายนี้ไว้อย่างชัดเจน
         }
+
         $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
         return [int]$Value
     } catch {
-        Write-Host "[!] Failed reading registry value: $_" -ForegroundColor Yellow
+        Write-Host "[!] Unable to read registry value: $_" -ForegroundColor Yellow
         return $null
     }
 }
 
-$CurrentValue = Get-ExperimentalFeaturesValue
+$CurrentValue = Get-AppInstallerExperimentalFeaturesValue
 
 if ($null -eq $CurrentValue) {
-    Write-Host "[!] Unable to determine current setting." -ForegroundColor Yellow
+    Write-Host "[!] Unable to determine current setting or value does not exist." -ForegroundColor Yellow
     $Status = "NON-COMPLIANT"
-} elseif ($CurrentValue -eq $DesiredValue) {
-    Write-Host "Value is $CurrentValue. Policy is compliant." -ForegroundColor Green
+}
+elseif ($CurrentValue -eq $DesiredValue) {
+    Write-Host "Value is Disabled ($CurrentValue)." -ForegroundColor Green
     $Status = "COMPLIANT"
-} else {
-    Write-Host "Current value is $CurrentValue. Expected: $DesiredValue." -ForegroundColor Red
-    Write-Host "Policy is not compliant." -ForegroundColor Red
+}
+else {
+    Write-Host "Value is incorrect ($CurrentValue). Expected: $DesiredValue (Disabled)." -ForegroundColor Red
     $Status = "NON-COMPLIANT"
 }
 

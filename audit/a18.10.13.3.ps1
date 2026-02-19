@@ -7,7 +7,7 @@
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 1
-$RegPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent"
 $ValueName = "DisableWindowsConsumerFeatures"
 
 Write-Host "=============================================================="
@@ -15,7 +15,7 @@ Write-Host "Audit started: $Date"
 Write-Host "Control 18.10.13.3: Ensure 'Turn off Microsoft consumer experiences' is Enabled"
 Write-Host "=============================================================="
 
-function Get-WindowsConsumerExperienceValue {
+function Get-WindowsConsumerFeaturesValue {
     try {
         if (-not (Test-Path -Path $RegPath)) {
             return 0
@@ -29,7 +29,7 @@ function Get-WindowsConsumerExperienceValue {
     }
 }
 
-$CurrentValue = Get-WindowsConsumerExperienceValue
+$CurrentValue = Get-WindowsConsumerFeaturesValue
 
 if ($null -eq $CurrentValue) {
     Write-Host "[!] Unable to determine current setting." -ForegroundColor Yellow

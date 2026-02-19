@@ -2,13 +2,13 @@
 # CIS Check: 18.10.13.1 (L1) - Audit Script
 # Description: Ensure 'Turn off cloud consumer account state content' is set to 'Enabled'
 # GPO Path: Computer Configuration > Policies > Administrative Templates > Windows Components > Cloud Content > Turn off cloud consumer account state content
-# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent\DisableCloudConsumerAccountStateContent
+# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent\DisableConsumerAccountStateContent
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 1
-$RegPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent"
-$ValueName = "DisableCloudConsumerAccountStateContent"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent"
+$ValueName = "DisableConsumerAccountStateContent"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"

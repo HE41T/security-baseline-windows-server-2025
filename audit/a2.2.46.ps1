@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 2.2.46 (L1) - Audit Script (Standardized)
-# Description: Ensure 'Restore files and directories' is set to 'Administrators'
+# Description: Ensure 'Restore files and directories' is set to 'Administrators' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
@@ -9,7 +9,7 @@ $DesiredSids = @("S-1-5-32-544")
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 2.2.46: Restore files and directories"
+Write-Host "Control 2.2.46: Ensure 'Restore files and directories' is set to 'Administrators' (Automated)"
 Write-Host "=============================================================="
 
 $Privilege = "SeRestorePrivilege"

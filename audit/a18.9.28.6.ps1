@@ -1,12 +1,12 @@
 ﻿# ==============================================================
 # CIS Check: 18.9.28.6 (L1) - Audit Script
-# Description: Ensure 18.9.28.6 BlockPicturePassword is set to 1
+# Description: Ensure 18.9.28.6 BlockDomainPicturePassword is set to 1
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 1
 $RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
-$RegName = "BlockPicturePassword"
+$RegName = "BlockDomainPicturePassword"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"

@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 2.3.8.1 (L1) - Audit Script
-# Description: Microsoft network client: Digitally sign (always)
+# Description: Ensure 'Microsoft network client: Digitally sign communications (always)' is set to 'Enabled' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

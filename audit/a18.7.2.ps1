@@ -5,8 +5,8 @@
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 1
-$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Redirection Guard"
-$RegName = "Enabled"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers"
+$RegName = "RedirectionguardPolicy"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"

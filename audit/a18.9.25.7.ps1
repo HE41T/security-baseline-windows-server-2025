@@ -1,12 +1,12 @@
 ﻿# ==============================================================
 # CIS Check: 18.9.25.7 (L1) - Audit Script
-# Description: Ensure 18.9.25.7 PostAuthenticationGracePeriod is set to 8
+# Description: Ensure 18.9.25.7 PostAuthenticationResetDelay is set to 8
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 8
-$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft Services\AdmPwd"
-$RegName = "PostAuthenticationGracePeriod"
+$RegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\LAPS"
+$RegName = "PostAuthenticationResetDelay"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"

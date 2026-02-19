@@ -5,7 +5,7 @@
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 0
-$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Bowser"
 $RegName = "EnableMailslots"
 
 Write-Host "=============================================================="

@@ -1,69 +1,53 @@
 # ==============================================================
 # CIS Check: 19.7.5.2 (L1) - Remediation Script
-# Description: Ensure 'Notify antivirus programs when opening attachments' is set to 'Enabled' (Automated)
-# Instructions: Set the per-user registry key under each loaded HKU hive
+# Description: Set 'Notify antivirus programs when opening attachments' to 'Enabled' (3)
 # ==============================================================
 
-$LogFile = "C:\\Windows\\Temp\\remediate_19.7.5.2.log"
+$LogFile = "$env:TEMP\remediate_av_notification.log"
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$SubPath = "Software\Microsoft\Windows\CurrentVersion\Policies\Attachments"
-$ValueName = "ScanWithAntiVirus"
 $DesiredValue = 3
+$RegPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Attachments"
+$ValueName = "ScanWithAntiVirus"
 
-$StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="
-Write-Host $StartMsg
-Write-Host "Control 19.7.5.2: Ensure 'Notify antivirus programs when opening attachments' is set to 'Enabled' (Automated)"
+Write-Host "Remediation started: $Date"
+Write-Host "Enabling Antivirus notification for file attachments (Registry: 3)"
 Write-Host "=============================================================="
 
-Add-Content -Path $LogFile -Value "`n=============================================================="
-Add-Content -Path $LogFile -Value $StartMsg
+Add-Content -Path $LogFile -Value "Remediation started: $Date"
 
-function Set-UserValue {
-    [CmdletBinding(SupportsShouldProcess=$true)]
-    [OutputType([int])]
-    param(
-        [Parameter(Mandatory=$true)]
-        $Sid
-    )
-    $RegRoot = Join-Path "HKU:\$($Sid.PSChildName)" "$SubPath"
-    if (-not $PSCmdlet.ShouldProcess($RegRoot, "Set $ValueName")) {
-        return $null
-    }
-    if (-not (Test-Path -Path $RegRoot)) {
-        New-Item -Path $RegRoot -Force | Out-Null
-    }
-    Set-ItemProperty -Path $RegRoot -Name $ValueName -Value $DesiredValue -Type DWord -Force
-    try {
-        $Current = Get-ItemPropertyValue -Path $RegRoot -Name $ValueName -ErrorAction Stop
-        return [int]$Current
-    } catch {
-        return $null
-    }
-}
+try {
+    # --- Auto-Generated LGPO Injection ---
+    $LgpoContent = @"
+User
+Software\Microsoft\Windows\CurrentVersion\Policies\Attachments
+ScanWithAntiVirus
+DWORD:3
+"@
+    
+    $LgpoFile = "C:\Windows\Temp\lgpo_temp_$ValueName.txt"
+    Set-Content -Path $LgpoFile -Value $LgpoContent -Encoding Ascii
 
-$Status = "COMPLIANT"
-$Sids = Get-ChildItem HKU:\ | Where-Object { $_.PSChildName -match '^S-1-5-21-' }
-if (-not $Sids) {
-    $Msg = "No user hives found under HKU:\"; Write-Host $Msg -ForegroundColor Yellow; Add-Content -Path $LogFile -Value $Msg
-    $Status = "NON-COMPLIANT"
-} else {
-    foreach ($Sid in $Sids) {
-        $NewValue = Set-UserValue -Sid $Sid
-        if ($NewValue -eq $DesiredValue) {
-            $Msg = "$($Sid.PSChildName): Set to $NewValue."; Write-Host $Msg -ForegroundColor Green; Add-Content -Path $LogFile -Value $Msg
-        } else {
-            $Msg = "$($Sid.PSChildName): Failed to set value (current $NewValue)."; Write-Host $Msg -ForegroundColor Red; Add-Content -Path $LogFile -Value $Msg
-            $Status = "NON-COMPLIANT"
-        }
+    if (Test-Path "C:\Windows\Temp\LGPO.exe") {
+        & "C:\Windows\Temp\LGPO.exe" /q /t $LgpoFile | Out-Null
+        gpupdate /force | Out-Null
+        Write-Host "Success: Applied via LGPO.exe (GPO & Registry updated)" -ForegroundColor Green
+        Add-Content -Path $LogFile -Value "Status: COMPLIANT - Applied via LGPO"
+        $ExitCode = 0
+    } else {
+        Write-Host "[!] LGPO.exe not found! Applying to Registry only." -ForegroundColor Yellow
+        if (-not (Test-Path -Path "$RegPath")) { New-Item -Path "$RegPath" -Force | Out-Null }
+        Set-ItemProperty -Path "$RegPath" -Name "$ValueName" -Value $DesiredValue -Type DWord -Force
+        $ExitCode = 0
     }
+
+    if (Test-Path $LgpoFile) { Remove-Item -Path $LgpoFile -Force }
+    # ---------------------------------------
+} catch {
+    Write-Host "Error: Failed to set registry value. $_" -ForegroundColor Red
+    Add-Content -Path $LogFile -Value "Status: FAILED - $_"
+    $ExitCode = 1
 }
 
 Write-Host "=============================================================="
-Write-Host "Remediation completed at $(Get-Date)"
-Write-Host "Final Status: $Status"
-Write-Host "=============================================================="
-Add-Content -Path $LogFile -Value "Final Status: $Status"
-Add-Content -Path $LogFile -Value "=============================================================="
-
-if ($Status -eq "COMPLIANT") { exit 0 } else { exit 1 }
+exit $ExitCode

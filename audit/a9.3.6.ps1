@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 9.3.6 (L1) - Audit Script
-# Description: FW Public: Log Name
+# Description: Ensure 'Windows Firewall: Public: Logging: Name' is set to '%SystemRoot%\\System32\\logfiles\\firewall\\publicfw.log' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

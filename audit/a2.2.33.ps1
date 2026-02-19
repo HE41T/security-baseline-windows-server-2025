@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 2.2.33 (L1) - Audit Script (Standardized)
-# Description: Impersonate a client after authentication
+# Description: Ensure 'Impersonate a client after authentication' is set to 'Administrators, LOCAL SERVICE, NETWORK SERVICE, SERVICE' and (when the Web Server (IIS) Role with Web Services Role Service is installed) 'IIS_IUSRS' (MS only) (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

@@ -4,9 +4,9 @@
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$DesiredValue = 1
-$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Rpc"
-$RegName = "ClientRpcProtocol"
+$DesiredValue = 0
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers\RPC"
+$RegName = "RpcUseNamedPipeProtocol"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"

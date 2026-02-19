@@ -1,46 +1,43 @@
 # ==============================================================
 # CIS Check: 18.10.58.1 (L1) - Audit Script
-# Description: Ensure 'Prevent downloading of enclosures' is set to 'Enabled' (Automated)
-# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds
+# Description: Ensure 'Prevent downloading of enclosures' is set to 'Enabled'
+# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds\DisableEnclosureDownload
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$RegPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Internet Explorer\\Feeds"
-$ValueName = "DisableEnclosureDownload"
 $DesiredValue = 1
-$ValueType = "DWord"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds"
+$ValueName = "DisableEnclosureDownload"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 18.10.58.1: Ensure 'Prevent downloading of enclosures' is set to 'Enabled' (Automated)"
+Write-Host "Control 18.10.58.1: Check RSS Feed Enclosure Download Restriction"
 Write-Host "=============================================================="
 
-function Get-PolicyValue {
+function Get-RSSDisableValue {
     try {
         if (-not (Test-Path -Path $RegPath)) {
             return $null
         }
         $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
-        if ($ValueType -eq "DWord") {
-            return [int]$Value
-        }
-        return [string]$Value
+        return [int]$Value
     } catch {
-        Write-Host "[!] Failed reading registry value: $_" -ForegroundColor Yellow
         return $null
     }
 }
 
-$CurrentValue = Get-PolicyValue
+$CurrentValue = Get-RSSDisableValue
 
 if ($null -eq $CurrentValue) {
-    Write-Host "[!] Unable to determine current setting." -ForegroundColor Yellow
+    Write-Host "[!] Value is NOT configured via GPO (Default is Allowed)." -ForegroundColor Yellow
     $Status = "NON-COMPLIANT"
-} elseif ($CurrentValue -eq $DesiredValue) {
-    Write-Host "Current value is $CurrentValue. Policy is compliant." -ForegroundColor Green
+}
+elseif ($CurrentValue -eq $DesiredValue) {
+    Write-Host "Value is Compliant ($CurrentValue - Downloading is Blocked)." -ForegroundColor Green
     $Status = "COMPLIANT"
-} else {
-    Write-Host "Current value is $CurrentValue. Expected: $DesiredValue." -ForegroundColor Red
+}
+else {
+    Write-Host "Value is incorrect ($CurrentValue). RSS downloading is ALLOWED!" -ForegroundColor Red
     $Status = "NON-COMPLIANT"
 }
 

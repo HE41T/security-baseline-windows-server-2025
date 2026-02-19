@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 2.2.22 (L1) - Audit Script (Standardized)
-# Description: Ensure 'Deny access...' includes Guests and Local account/Admins
+# Description: Ensure 'Deny access to this computer from the network' to include 'Guests, Local account and member of Administrators group' (MS only) (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

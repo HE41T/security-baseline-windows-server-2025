@@ -1,12 +1,12 @@
 ﻿# ==============================================================
 # CIS Check: 18.9.25.2 (L1) - Audit Script
-# Description: Ensure 18.9.25.2 PwdExpirationProtectionEnabled is set to 1
+# Description: Ensure 18.9.25.2 PasswordExpirationProtectionEnabled is set to 1
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 1
-$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft Services\AdmPwd"
-$RegName = "PwdExpirationProtectionEnabled"
+$RegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\LAPS"
+$RegName = "PasswordExpirationProtectionEnabled"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"

@@ -4,7 +4,7 @@
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$DesiredValue = 8
+$DesiredValue = 3
 $RegPath = "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch"
 $RegName = "DriverLoadPolicy"
 

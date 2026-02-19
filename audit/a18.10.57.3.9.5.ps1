@@ -1,46 +1,43 @@
 # ==============================================================
 # CIS Check: 18.10.57.3.9.5 (L1) - Audit Script
-# Description: Ensure 'Set client connection encryption level' is set to 'Enabled: High Level' (Automated)
-# Registry Path: HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services
+# Description: Ensure 'Set client connection encryption level' is set to 'Enabled: High Level'
+# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services\MinEncryptionLevel
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$RegPath = "HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services"
-$ValueName = "MinEncryptionLevel"
 $DesiredValue = 3
-$ValueType = "DWord"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
+$ValueName = "MinEncryptionLevel"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 18.10.57.3.9.5: Ensure 'Set client connection encryption level' is set to 'Enabled: High Level' (Automated)"
+Write-Host "Control 18.10.57.3.9.5: Check RDP Encryption Level (High)"
 Write-Host "=============================================================="
 
-function Get-PolicyValue {
+function Get-MinEncryptionValue {
     try {
         if (-not (Test-Path -Path $RegPath)) {
             return $null
         }
         $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
-        if ($ValueType -eq "DWord") {
-            return [int]$Value
-        }
-        return [string]$Value
+        return [int]$Value
     } catch {
-        Write-Host "[!] Failed reading registry value: $_" -ForegroundColor Yellow
         return $null
     }
 }
 
-$CurrentValue = Get-PolicyValue
+$CurrentValue = Get-MinEncryptionValue
 
 if ($null -eq $CurrentValue) {
-    Write-Host "[!] Unable to determine current setting." -ForegroundColor Yellow
+    Write-Host "[!] Value is NOT configured via GPO." -ForegroundColor Yellow
     $Status = "NON-COMPLIANT"
-} elseif ($CurrentValue -eq $DesiredValue) {
-    Write-Host "Current value is $CurrentValue. Policy is compliant." -ForegroundColor Green
+}
+elseif ($CurrentValue -eq $DesiredValue) {
+    Write-Host "Value is Compliant ($CurrentValue - High Level 128-bit)." -ForegroundColor Green
     $Status = "COMPLIANT"
-} else {
-    Write-Host "Current value is $CurrentValue. Expected: $DesiredValue." -ForegroundColor Red
+}
+else {
+    Write-Host "Value is incorrect ($CurrentValue). Encryption level is NOT set to High!" -ForegroundColor Red
     $Status = "NON-COMPLIANT"
 }
 

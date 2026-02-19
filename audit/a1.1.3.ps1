@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 1.1.3 (L1) - Audit Script
-# Description: Ensure 'Minimum password age' is set to '1 or more day(s)'
+# Description: Ensure 'Minimum password age' is set to '1 or more day(s)' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"

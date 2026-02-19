@@ -1,46 +1,46 @@
 # ==============================================================
 # CIS Check: 18.10.26.3.1 (L1) - Audit Script
-# Description: Ensure 'Setup: Control Event Log behavior when the log file reaches its maximum size' is set to 'Disabled' (Automated)
-# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup
+# Description: Ensure 'Setup: Control Event Log behavior when the log file reaches its maximum size' is set to 'Disabled'
+# GPO Path: Computer Configuration > Administrative Templates > Windows Components > Event Log Service > Setup > Control Event Log behavior when the log file reaches its maximum size
+# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup\Retention
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$RegPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\EventLog\\Setup"
-$ValueName = "Retention"
 $DesiredValue = "0"
-$ValueType = "String"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\Setup"
+$ValueName = "Retention"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 18.10.26.3.1: Ensure 'Setup: Control Event Log behavior when the log file reaches its maximum size' is set to 'Disabled' (Automated)"
+Write-Host "Control 18.10.26.3.1: Ensure 'Setup Log Retention' is Disabled (0)"
 Write-Host "=============================================================="
 
-function Get-PolicyValue {
+function Get-SetupEventLogRetentionValue {
     try {
         if (-not (Test-Path -Path $RegPath)) {
-            return $null
+            return $null # ถือว่าไม่ผ่านหากไม่มีการกำหนดค่านโยบายนี้ไว้อย่างชัดเจน
         }
+
         $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
-        if ($ValueType -eq "DWord") {
-            return [int]$Value
-        }
         return [string]$Value
     } catch {
-        Write-Host "[!] Failed reading registry value: $_" -ForegroundColor Yellow
+        Write-Host "[!] Unable to read registry value: $_" -ForegroundColor Yellow
         return $null
     }
 }
 
-$CurrentValue = Get-PolicyValue
+$CurrentValue = Get-SetupEventLogRetentionValue
 
 if ($null -eq $CurrentValue) {
-    Write-Host "[!] Unable to determine current setting." -ForegroundColor Yellow
+    Write-Host "[!] Unable to determine current setting or value does not exist." -ForegroundColor Yellow
     $Status = "NON-COMPLIANT"
-} elseif ($CurrentValue -eq $DesiredValue) {
-    Write-Host "Current value is $CurrentValue. Policy is compliant." -ForegroundColor Green
+}
+elseif ($CurrentValue -eq $DesiredValue) {
+    Write-Host "Value is Disabled ($CurrentValue)." -ForegroundColor Green
     $Status = "COMPLIANT"
-} else {
-    Write-Host "Current value is $CurrentValue. Expected: $DesiredValue." -ForegroundColor Red
+}
+else {
+    Write-Host "Value is incorrect ($CurrentValue). Expected: $DesiredValue (Disabled)." -ForegroundColor Red
     $Status = "NON-COMPLIANT"
 }
 

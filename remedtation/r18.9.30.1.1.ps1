@@ -5,7 +5,7 @@
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 1
-$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\NetBIOS\Parameters"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Netlogon\Parameters"
 $RegName = "BlockNetBIOSDiscovery"
 
 $StartMsg = "Remediation started: $Date"

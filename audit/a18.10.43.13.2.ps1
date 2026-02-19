@@ -1,46 +1,43 @@
 # ==============================================================
 # CIS Check: 18.10.43.13.2 (L1) - Audit Script
-# Description: Ensure 'Scan packed executables' is set to 'Enabled' (Automated)
-# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan
+# Description: Ensure 'Scan packed executables' is set to 'Enabled'
+# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan\DisablePackedExeScanning
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$RegPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Scan"
-$ValueName = "DisablePackedExeScanning"
 $DesiredValue = 0
-$ValueType = "DWord"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan"
+$ValueName = "DisablePackedExeScanning"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 18.10.43.13.2: Ensure 'Scan packed executables' is set to 'Enabled' (Automated)"
+Write-Host "Control 18.10.43.13.2: Check Packed Executable Scanning"
 Write-Host "=============================================================="
 
-function Get-PolicyValue {
+function Get-PackedExeScanValue {
     try {
         if (-not (Test-Path -Path $RegPath)) {
             return $null
         }
         $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
-        if ($ValueType -eq "DWord") {
-            return [int]$Value
-        }
-        return [string]$Value
+        return [int]$Value
     } catch {
-        Write-Host "[!] Failed reading registry value: $_" -ForegroundColor Yellow
         return $null
     }
 }
 
-$CurrentValue = Get-PolicyValue
+$CurrentValue = Get-PackedExeScanValue
 
 if ($null -eq $CurrentValue) {
-    Write-Host "[!] Unable to determine current setting." -ForegroundColor Yellow
+    Write-Host "[!] Value is NOT configured. Default is Enabled, but CIS requires explicit check." -ForegroundColor Yellow
     $Status = "NON-COMPLIANT"
-} elseif ($CurrentValue -eq $DesiredValue) {
-    Write-Host "Current value is $CurrentValue. Policy is compliant." -ForegroundColor Green
+}
+elseif ($CurrentValue -eq $DesiredValue) {
+    Write-Host "Value is Compliant ($CurrentValue - Scanning is Enabled)." -ForegroundColor Green
     $Status = "COMPLIANT"
-} else {
-    Write-Host "Current value is $CurrentValue. Expected: $DesiredValue." -ForegroundColor Red
+}
+else {
+    Write-Host "Value is incorrect ($CurrentValue). Packed executable scanning is DISABLED!" -ForegroundColor Red
     $Status = "NON-COMPLIANT"
 }
 

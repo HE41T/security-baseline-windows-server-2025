@@ -1,9 +1,8 @@
 # ==============================================================
 # CIS Check: 2.3.7.3 (L1) - Remediation Script
-# Description: Interactive logon: Machine inactivity limit (<=900)
+# Description: Ensure 'Interactive logon: Machine inactivity limit' is set to '900 or fewer second(s), but not 0' (Automated)
 # ==============================================================
 
-$LogFile = "C:\Windows\Temp\remediate_2_3_7_3.log"
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
 $StartMsg = "Remediation started: $Date"
@@ -12,8 +11,6 @@ Write-Host $StartMsg
 Write-Host "Control 2.3.7.3: Interactive logon: Machine inactivity limit (<=900)"
 Write-Host "=============================================================="
 
-Add-Content -Path $LogFile -Value "`n=============================================================="
-Add-Content -Path $LogFile -Value "$StartMsg"
 
 
 try {
@@ -30,25 +27,20 @@ try {
     if ($NewVal -eq $TargetValue) {
         $Msg = "Fixed. Set $RegName to $NewVal"
         Write-Host $Msg -ForegroundColor Green
-        Add-Content -Path $LogFile -Value $Msg
-        $Status = "COMPLIANT"
+                $Status = "COMPLIANT"
     } else {
         $Msg = "Failed to set registry value."
         Write-Host $Msg -ForegroundColor Red
-        Add-Content -Path $LogFile -Value $Msg
-        $Status = "NON-COMPLIANT"
+                $Status = "NON-COMPLIANT"
     }
 } catch {
     $Msg = "Error: $_"
     Write-Host $Msg -ForegroundColor Red
-    Add-Content -Path $LogFile -Value $Msg
-    $Status = "NON-COMPLIANT"
+        $Status = "NON-COMPLIANT"
 }
 
 Write-Host "=============================================================="
 Write-Host "Remediation completed at $(Get-Date)"
 Write-Host "Final Status: $Status"
 Write-Host "=============================================================="
-Add-Content -Path $LogFile -Value "Final Status: $Status"
-Add-Content -Path $LogFile -Value "=============================================================="
 if ($Status -eq "COMPLIANT") { exit 0 } else { exit 1 }

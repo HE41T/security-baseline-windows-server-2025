@@ -1,9 +1,8 @@
 # ==============================================================
 # CIS Check: 1.2.4 (L1) - Remediation Script
-# Description: Ensure 'Reset account lockout counter after' is set to '15 or more minute(s)'
+# Description: Ensure 'Reset account lockout counter after' is set to '15 or more minute(s)' (Automated)
 # ==============================================================
 
-$LogFile = "C:\Windows\Temp\remediate_lockout_window.log"
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 15
 
@@ -13,8 +12,6 @@ Write-Host $StartMsg
 Write-Host "Control 1.2.4: Ensure 'Reset account lockout counter' is >= $DesiredValue"
 Write-Host "=============================================================="
 
-Add-Content -Path $LogFile -Value "`n=============================================================="
-Add-Content -Path $LogFile -Value "$StartMsg"
 
 function Get-LockoutWindow {
     try {
@@ -37,13 +34,11 @@ if ($CurrentValue -eq -1) { $CurrentValue = 0 }
 if ($CurrentValue -ge $DesiredValue) {
     $Msg = "Value is correct ($CurrentValue). No action needed."
     Write-Host $Msg -ForegroundColor Green
-    Add-Content -Path $LogFile -Value $Msg
-    $Status = "COMPLIANT"
+        $Status = "COMPLIANT"
 } else {
     $Msg = "Value is incorrect ($CurrentValue). Fixing..."
     Write-Host $Msg -ForegroundColor Yellow
-    Add-Content -Path $LogFile -Value $Msg
-    
+        
     try {
         # /lockoutwindow is the parameter
         $Proc = Start-Process "net.exe" -ArgumentList "accounts /lockoutwindow:$DesiredValue" -NoNewWindow -Wait -PassThru
@@ -53,13 +48,11 @@ if ($CurrentValue -ge $DesiredValue) {
             if ($NewValue -ge $DesiredValue) {
                 $ResultMsg = "Fixed. New value is $NewValue."
                 Write-Host $ResultMsg -ForegroundColor Green
-                Add-Content -Path $LogFile -Value $ResultMsg
-                $Status = "COMPLIANT"
+                                $Status = "COMPLIANT"
             } else {
                 $FailMsg = "Verification failed. Value remains $NewValue (Ensure Lockout Threshold is not 0)"
                 Write-Host $FailMsg -ForegroundColor Red
-                Add-Content -Path $LogFile -Value $FailMsg
-                $Status = "NON-COMPLIANT"
+                                $Status = "NON-COMPLIANT"
             }
         } else {
             throw "Net accounts command failed with exit code $($Proc.ExitCode)"
@@ -67,8 +60,7 @@ if ($CurrentValue -ge $DesiredValue) {
     } catch {
         $ErrorMsg = "Failed to fix: $_"
         Write-Host $ErrorMsg -ForegroundColor Red
-        Add-Content -Path $LogFile -Value $ErrorMsg
-        $Status = "NON-COMPLIANT"
+                $Status = "NON-COMPLIANT"
     }
 }
 
@@ -76,7 +68,5 @@ Write-Host "=============================================================="
 Write-Host "Remediation completed at $(Get-Date)"
 Write-Host "Final Status: $Status"
 Write-Host "=============================================================="
-Add-Content -Path $LogFile -Value "Final Status: $Status"
-Add-Content -Path $LogFile -Value "=============================================================="
 
 if ($Status -eq "COMPLIANT") { exit 0 } else { exit 1 }

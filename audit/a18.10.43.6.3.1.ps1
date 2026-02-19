@@ -1,46 +1,46 @@
 # ==============================================================
 # CIS Check: 18.10.43.6.3.1 (L1) - Audit Script
-# Description: Ensure 'Prevent users and apps from accessing dangerous websites' is set to 'Enabled: Block' (Automated)
-# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\Network Protection
+# Description: Ensure 'Prevent users and apps from accessing dangerous websites' is set to 'Enabled: Block'
+# GPO Path: Computer Configuration > Administrative Templates > Windows Components > Microsoft Defender Antivirus > Microsoft Defender Exploit Guard > Network Protection > Prevent users and apps from accessing dangerous websites
+# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\Network Protection\EnableNetworkProtection
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$RegPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\Network Protection"
-$ValueName = "EnableNetworkProtection"
 $DesiredValue = 1
-$ValueType = "DWord"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\Network Protection"
+$ValueName = "EnableNetworkProtection"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 18.10.43.6.3.1: Ensure 'Prevent users and apps from accessing dangerous websites' is set to 'Enabled: Block' (Automated)"
+Write-Host "Control 18.10.43.6.3.1: Ensure Network Protection is set to Block"
 Write-Host "=============================================================="
 
-function Get-PolicyValue {
+function Get-NetworkProtectionValue {
     try {
         if (-not (Test-Path -Path $RegPath)) {
             return $null
         }
+
         $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
-        if ($ValueType -eq "DWord") {
-            return [int]$Value
-        }
-        return [string]$Value
+        return [int]$Value
     } catch {
-        Write-Host "[!] Failed reading registry value: $_" -ForegroundColor Yellow
+        Write-Host "[!] Unable to read registry value: $_" -ForegroundColor Yellow
         return $null
     }
 }
 
-$CurrentValue = Get-PolicyValue
+$CurrentValue = Get-NetworkProtectionValue
 
 if ($null -eq $CurrentValue) {
-    Write-Host "[!] Unable to determine current setting." -ForegroundColor Yellow
+    Write-Host "[!] Unable to determine current setting or value does not exist." -ForegroundColor Yellow
     $Status = "NON-COMPLIANT"
-} elseif ($CurrentValue -eq $DesiredValue) {
-    Write-Host "Current value is $CurrentValue. Policy is compliant." -ForegroundColor Green
+}
+elseif ($CurrentValue -eq $DesiredValue) {
+    Write-Host "Value is Enabled ($CurrentValue) - Block mode is active." -ForegroundColor Green
     $Status = "COMPLIANT"
-} else {
-    Write-Host "Current value is $CurrentValue. Expected: $DesiredValue." -ForegroundColor Red
+}
+else {
+    Write-Host "Value is incorrect ($CurrentValue). Expected: $DesiredValue (Block)." -ForegroundColor Red
     $Status = "NON-COMPLIANT"
 }
 

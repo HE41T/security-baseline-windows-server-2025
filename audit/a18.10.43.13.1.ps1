@@ -1,46 +1,43 @@
 # ==============================================================
 # CIS Check: 18.10.43.13.1 (L1) - Audit Script
-# Description: Ensure 'Scan excluded files and directories during quick scans' is set to 'Enabled: 1' (Automated)
-# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan
+# Description: Ensure 'Scan excluded files and directories during quick scans' is set to 'Enabled: 1'
+# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan\QuickScanIncludeExclusions
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$RegPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Scan"
-$ValueName = "QuickScanIncludeExclusions"
 $DesiredValue = 1
-$ValueType = "DWord"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Scan"
+$ValueName = "QuickScanIncludeExclusions"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 18.10.43.13.1: Ensure 'Scan excluded files and directories during quick scans' is set to 'Enabled: 1' (Automated)"
+Write-Host "Control 18.10.43.13.1: Check Quick Scan Include Exclusions"
 Write-Host "=============================================================="
 
-function Get-PolicyValue {
+function Get-QuickScanExclusionValue {
     try {
         if (-not (Test-Path -Path $RegPath)) {
             return $null
         }
         $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
-        if ($ValueType -eq "DWord") {
-            return [int]$Value
-        }
-        return [string]$Value
+        return [int]$Value
     } catch {
-        Write-Host "[!] Failed reading registry value: $_" -ForegroundColor Yellow
         return $null
     }
 }
 
-$CurrentValue = Get-PolicyValue
+$CurrentValue = Get-QuickScanExclusionValue
 
 if ($null -eq $CurrentValue) {
-    Write-Host "[!] Unable to determine current setting." -ForegroundColor Yellow
+    Write-Host "[!] Value is NOT configured (Default is Disabled)." -ForegroundColor Yellow
     $Status = "NON-COMPLIANT"
-} elseif ($CurrentValue -eq $DesiredValue) {
-    Write-Host "Current value is $CurrentValue. Policy is compliant." -ForegroundColor Green
+}
+elseif ($CurrentValue -eq $DesiredValue) {
+    Write-Host "Value is Compliant ($CurrentValue - Enabled)." -ForegroundColor Green
     $Status = "COMPLIANT"
-} else {
-    Write-Host "Current value is $CurrentValue. Expected: $DesiredValue." -ForegroundColor Red
+}
+else {
+    Write-Host "Value is incorrect ($CurrentValue). Expected: $DesiredValue." -ForegroundColor Red
     $Status = "NON-COMPLIANT"
 }
 
