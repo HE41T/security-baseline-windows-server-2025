@@ -6,7 +6,7 @@
 
 $LogFile = "C:\Windows\Temp\remediate_18_10_43_10_5.log"
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$RegPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Real-Time Protection"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection"
 $ValueName = "DisableScriptScanning"
 $DesiredValue = 0
 $ValueType = "DWord"
@@ -25,7 +25,7 @@ function Get-PolicyValue {
     # --- Auto-Generated LGPO Injection ---
     $LgpoContent = @"
 Computer
-SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Real-Time Protection
+SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection
 DisableScriptScanning
 DWORD:0
 "@
@@ -80,7 +80,7 @@ if ($CurrentValue -eq $DesiredValue) {
     # --- Auto-Generated LGPO Injection ---
     $LgpoContent = @"
 Computer
-SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Real-Time Protection
+SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection
 DisableScriptScanning
 DWORD:0
 "@

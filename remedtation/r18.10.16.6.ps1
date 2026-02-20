@@ -22,33 +22,32 @@ Add-Content -Path $LogFile -Value $StartMsg
 
 function Get-LimitDiagnosticLogCollectionValue {
     try {
-    # --- Auto-Generated LGPO Injection ---
-    $LgpoContent = @"
+        # --- Auto-Generated LGPO Injection ---
+        $LgpoContent = @"
 Computer
 SOFTWARE\Policies\Microsoft\Windows\DataCollection
 LimitDiagnosticLogCollection
 DWORD:1
 "@
-    
-    $LgpoFile = "C:\Windows\Temp\lgpo_temp_$ValueName.txt"
-    Set-Content -Path $LgpoFile -Value $LgpoContent -Encoding Ascii
 
-    if (Test-Path "C:\Windows\Temp\LGPO.exe") {
-        & "C:\Windows\Temp\LGPO.exe" /q /t $LgpoFile | Out-Null
-        gpupdate /force | Out-Null
-        Write-Host "Success: Applied via LGPO.exe (GPO & Registry updated)" -ForegroundColor Green
-        Add-Content -Path $LogFile -Value "Status: COMPLIANT - Applied via LGPO"
-        $ExitCode = 0
-    } else {
-        Write-Host "[!] LGPO.exe not found! Applying to Registry only." -ForegroundColor Yellow
-        if (-not (Test-Path -Path "$RegPath")) { New-Item -Path "$RegPath" -Force | Out-Null }
-        Set-ItemProperty -Path "$RegPath" -Name "$ValueName" -Value $DesiredValue -Type DWord -Force
-        $ExitCode = 0
+        $LgpoFile = "C:\Windows\Temp\lgpo_temp_$ValueName.txt"
+        Set-Content -Path $LgpoFile -Value $LgpoContent -Encoding Ascii
+
+        if (Test-Path "C:\Windows\Temp\LGPO.exe") {
+            & "C:\Windows\Temp\LGPO.exe" /q /t $LgpoFile | Out-Null
+            gpupdate /force | Out-Null
+            Write-Host "Success: Applied via LGPO.exe (GPO & Registry updated)" -ForegroundColor Green
+            Add-Content -Path $LogFile -Value "Status: COMPLIANT - Applied via LGPO"
+        } else {
+            Write-Host "[!] LGPO.exe not found! Applying to Registry only." -ForegroundColor Yellow
+            if (-not (Test-Path -Path "$RegPath")) { New-Item -Path "$RegPath" -Force | Out-Null }
+            Set-ItemProperty -Path "$RegPath" -Name "$ValueName" -Value $DesiredValue -Type DWord -Force
+        }
+
+        if (Test-Path $LgpoFile) { Remove-Item -Path $LgpoFile -Force }
+        # ---------------------------------------
     }
-
-    if (Test-Path $LgpoFile) { Remove-Item -Path $LgpoFile -Force }
-    # ---------------------------------------
-} catch {
+    catch {
         return -1
     }
 }
@@ -67,33 +66,32 @@ elseif ($CurrentValue -lt $DesiredValue) {
     Add-Content -Path $LogFile -Value $Msg
 
     try {
-    # --- Auto-Generated LGPO Injection ---
-    $LgpoContent = @"
+        # --- Auto-Generated LGPO Injection ---
+        $LgpoContent = @"
 Computer
 SOFTWARE\Policies\Microsoft\Windows\DataCollection
 LimitDiagnosticLogCollection
 DWORD:1
 "@
-    
-    $LgpoFile = "C:\Windows\Temp\lgpo_temp_$ValueName.txt"
-    Set-Content -Path $LgpoFile -Value $LgpoContent -Encoding Ascii
 
-    if (Test-Path "C:\Windows\Temp\LGPO.exe") {
-        & "C:\Windows\Temp\LGPO.exe" /q /t $LgpoFile | Out-Null
-        gpupdate /force | Out-Null
-        Write-Host "Success: Applied via LGPO.exe (GPO & Registry updated)" -ForegroundColor Green
-        Add-Content -Path $LogFile -Value "Status: COMPLIANT - Applied via LGPO"
-        $ExitCode = 0
-    } else {
-        Write-Host "[!] LGPO.exe not found! Applying to Registry only." -ForegroundColor Yellow
-        if (-not (Test-Path -Path "$RegPath")) { New-Item -Path "$RegPath" -Force | Out-Null }
-        Set-ItemProperty -Path "$RegPath" -Name "$ValueName" -Value $DesiredValue -Type DWord -Force
-        $ExitCode = 0
+        $LgpoFile = "C:\Windows\Temp\lgpo_temp_$ValueName.txt"
+        Set-Content -Path $LgpoFile -Value $LgpoContent -Encoding Ascii
+
+        if (Test-Path "C:\Windows\Temp\LGPO.exe") {
+            & "C:\Windows\Temp\LGPO.exe" /q /t $LgpoFile | Out-Null
+            gpupdate /force | Out-Null
+            Write-Host "Success: Applied via LGPO.exe (GPO & Registry updated)" -ForegroundColor Green
+            Add-Content -Path $LogFile -Value "Status: COMPLIANT - Applied via LGPO"
+        } else {
+            Write-Host "[!] LGPO.exe not found! Applying to Registry only." -ForegroundColor Yellow
+            if (-not (Test-Path -Path "$RegPath")) { New-Item -Path "$RegPath" -Force | Out-Null }
+            Set-ItemProperty -Path "$RegPath" -Name "$ValueName" -Value $DesiredValue -Type DWord -Force
+        }
+
+        if (Test-Path $LgpoFile) { Remove-Item -Path $LgpoFile -Force }
+        # ---------------------------------------
     }
-
-    if (Test-Path $LgpoFile) { Remove-Item -Path $LgpoFile -Force }
-    # ---------------------------------------
-} catch {
+    catch {
         $ErrorMsg = "Failed to fix: $_"
         Write-Host $ErrorMsg -ForegroundColor Red
         Add-Content -Path $LogFile -Value $ErrorMsg
