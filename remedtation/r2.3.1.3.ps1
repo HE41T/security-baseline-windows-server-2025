@@ -16,7 +16,7 @@ Write-Host "=============================================================="
 try {
     $User = Get-LocalUser | Where-Object { $_.SID -like "S-1-5-21-*-500" }
     if ($User) {
-        Rename-LocalUser -Name $User.Name -NewName "Administrator_REN"
+        Rename-LocalUser -Name $User.Name -NewName "Administrator"
         $Status = "COMPLIANT"
     }
 } catch { $Status = "NON-COMPLIANT" }

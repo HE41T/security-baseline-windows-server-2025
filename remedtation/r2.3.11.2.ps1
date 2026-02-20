@@ -1,6 +1,7 @@
 # ==============================================================
 # CIS Check: 2.3.11.2 (L1) - Remediation Script
 # Description: Ensure 'Network security: Allow LocalSystem NULL session fallback' is set to 'Disabled' (Automated)
+# Policy Value: 0
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
@@ -11,11 +12,12 @@ Write-Host $StartMsg
 Write-Host "Control 2.3.11.2: Allow LocalSystem NULL session fallback"
 Write-Host "=============================================================="
 
-
-
 try {
-    $RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa"
-    $RegName = "NullSessionFallback"
+    # Corrected Registry Path and Name for CIS 2.3.11.2
+    $RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0"
+    $RegName = "allownullsessionfallback"
+    
+    # Set Policy Value to 0 (Disabled)
     $TargetValue = 0
     
     if (-not (Test-Path $RegPath)) { New-Item -Path $RegPath -Force | Out-Null }
@@ -27,20 +29,20 @@ try {
     if ($NewVal -eq $TargetValue) {
         $Msg = "Fixed. Set $RegName to $NewVal"
         Write-Host $Msg -ForegroundColor Green
-                $Status = "COMPLIANT"
+        $Status = "COMPLIANT"
     } else {
         $Msg = "Failed to set registry value."
         Write-Host $Msg -ForegroundColor Red
-                $Status = "NON-COMPLIANT"
+        $Status = "NON-COMPLIANT"
     }
 } catch {
     $Msg = "Error: $_"
     Write-Host $Msg -ForegroundColor Red
-        $Status = "NON-COMPLIANT"
+    $Status = "NON-COMPLIANT"
 }
 
 Write-Host "=============================================================="
-Write-Host "Remediation completed at $(Get-Date)"
+Write-Host "Remediation completed at $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")"
 Write-Host "Final Status: $Status"
 Write-Host "=============================================================="
 if ($Status -eq "COMPLIANT") { exit 0 } else { exit 1 }

@@ -1,6 +1,7 @@
 # ==============================================================
 # CIS Check: 2.3.10.3 (L1) - Remediation Script
 # Description: Ensure 'Network access: Do not allow anonymous enumeration of SAM accounts and shares' is set to 'Enabled' (MS only) (Automated)
+# Policy Value: 1
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
@@ -8,14 +9,13 @@ $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="
 Write-Host $StartMsg
-Write-Host "Control 2.3.10.3: Do not allow anonymous enumeration of SAM accounts"
+Write-Host "Control 2.3.10.3: Do not allow anonymous enumeration of SAM accounts and shares"
 Write-Host "=============================================================="
-
-
 
 try {
     $RegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa"
-    $RegName = "RestrictAnonymousSAM"
+    # Corrected Registry Name for 'SAM accounts and shares'
+    $RegName = "RestrictAnonymous"
     $TargetValue = 1
     
     if (-not (Test-Path $RegPath)) { New-Item -Path $RegPath -Force | Out-Null }
@@ -27,20 +27,20 @@ try {
     if ($NewVal -eq $TargetValue) {
         $Msg = "Fixed. Set $RegName to $NewVal"
         Write-Host $Msg -ForegroundColor Green
-                $Status = "COMPLIANT"
+        $Status = "COMPLIANT"
     } else {
         $Msg = "Failed to set registry value."
         Write-Host $Msg -ForegroundColor Red
-                $Status = "NON-COMPLIANT"
+        $Status = "NON-COMPLIANT"
     }
 } catch {
     $Msg = "Error: $_"
     Write-Host $Msg -ForegroundColor Red
-        $Status = "NON-COMPLIANT"
+    $Status = "NON-COMPLIANT"
 }
 
 Write-Host "=============================================================="
-Write-Host "Remediation completed at $(Get-Date)"
+Write-Host "Remediation completed at $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")"
 Write-Host "Final Status: $Status"
 Write-Host "=============================================================="
 if ($Status -eq "COMPLIANT") { exit 0 } else { exit 1 }
