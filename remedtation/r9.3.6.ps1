@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 9.3.6 (L1) - Remediation Script
-# Description: Ensure 'Windows Firewall: Public: Logging: Name' is set to '%SystemRoot%\\System32\\logfiles\\firewall\\publicfw.log' (Automated)
+# Description: Ensure 'Windows Firewall: Public: Settings: Apply local connection security rules' is set to 'No' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
@@ -8,23 +8,38 @@ $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="
 Write-Host $StartMsg
-Write-Host "Control 9.3.6: FW Public: Log Name"
+Write-Host "Control 9.3.6: FW Public: Apply local connection security rules"
 Write-Host "=============================================================="
 
-
-
 try {
-    $Profile = "Public"
-    Set-NetFirewallProfile -Profile $Profile -LogFileName "%SystemRoot%\System32\logfiles\firewall\publicfw.log"
-    $Msg = "Set Firewall $Profile LogFileName to %SystemRoot%\System32\logfiles\firewall\publicfw.log"
+    # 1. Set Active Setting via Cmdlet (For immediate effect)
+    Set-NetFirewallProfile -Profile Public -AllowLocalIPsecRules False -ErrorAction SilentlyContinue
+    
+    # 2. Set Policy Registry (For Nessus/CIS Compliance)
+    $RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsFirewall\PublicProfile"
+    $RegName = "AllowLocalIPsecPolicyMerge"
+    $Value = 0
+    
+    if (!(Test-Path $RegPath)) {
+        New-Item -Path $RegPath -Force | Out-Null
+    }
+    
+    Set-ItemProperty -Path $RegPath -Name $RegName -Value $Value -Type DWord -Force
+    
+    $Msg = "Set Registry $RegName to $Value (Enabled)"
     Write-Host $Msg -ForegroundColor Green
-        $Status = "COMPLIANT"
+    $Status = "COMPLIANT"
+
 } catch {
     $Status = "NON-COMPLIANT"
 }
 
 Write-Host "=============================================================="
-Write-Host "Remediation completed at $(Get-Date)"
-Write-Host "Final Status: $Status"
+Write-Host "Remediation Status: $Status"
 Write-Host "=============================================================="
-if ($Status -eq "COMPLIANT") { exit 0 } else { exit 1 }
+
+if ($Status -eq "COMPLIANT") {
+    exit 0
+} else {
+    exit 1
+}

@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 9.3.9 (L1) - Remediation Script
-# Description: Ensure 'Windows Firewall: Public: Logging: Log successful connections' is set to 'Yes' (Automated)
+# Description: Ensure 'Windows Firewall: Public: Logging: Log dropped packets' is set to 'Yes' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
@@ -8,17 +8,16 @@ $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="
 Write-Host $StartMsg
-Write-Host "Control 9.3.9: FW Public: Log Success"
+Write-Host "Control 9.3.9: FW Public: Log Dropped Packets"
 Write-Host "=============================================================="
 
-
 try {
-    # 1. Set Active Setting via Cmdlet (Note: Param is LogAllowed)
-    Set-NetFirewallProfile -Profile Public -LogAllowed True -ErrorAction SilentlyContinue
+    # 1. Set Active Setting via Cmdlet (For immediate effect)
+    Set-NetFirewallProfile -Profile Public -LogBlocked True -ErrorAction SilentlyContinue
     
-    # 2. Set Policy Registry
+    # 2. Set Policy Registry (For Nessus/CIS Compliance)
     $RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsFirewall\PublicProfile\Logging"
-    $RegName = "LogAllowedConnections"
+    $RegName = "LogDroppedPackets"
     $Value = 1
     
     if (!(Test-Path $RegPath)) {
@@ -29,14 +28,18 @@ try {
     
     $Msg = "Set Registry $RegName to $Value (Enabled)"
     Write-Host $Msg -ForegroundColor Green
-        $Status = "COMPLIANT"
+    $Status = "COMPLIANT"
 
 } catch {
     $Status = "NON-COMPLIANT"
 }
 
 Write-Host "=============================================================="
-Write-Host "Remediation completed at $(Get-Date)"
-Write-Host "Final Status: $Status"
+Write-Host "Remediation Status: $Status"
 Write-Host "=============================================================="
-if ($Status -eq "COMPLIANT") { exit 0 } else { exit 1 }
+
+if ($Status -eq "COMPLIANT") {
+    exit 0
+} else {
+    exit 1
+}

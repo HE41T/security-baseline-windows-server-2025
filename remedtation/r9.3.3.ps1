@@ -1,6 +1,6 @@
 # ==============================================================
 # CIS Check: 9.3.3 (L1) - Remediation Script
-# Description: Ensure 'Windows Firewall: Public: Settings: Display a notification' is set to 'No' (Automated)
+# Description: Ensure 'Windows Firewall: Public: Outbound connections' is set to 'Allow (default)' (Automated)
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
@@ -8,23 +8,38 @@ $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="
 Write-Host $StartMsg
-Write-Host "Control 9.3.3: FW Public: Notify"
+Write-Host "Control 9.3.3: FW Public: Outbound connections"
 Write-Host "=============================================================="
 
-
-
 try {
-    $Profile = "Public"
-    Set-NetFirewallProfile -Profile $Profile -NotifyOnListen "False"
-    $Msg = "Set Firewall $Profile NotifyOnListen to False"
+    # 1. Set Active Setting via Cmdlet (For immediate effect)
+    Set-NetFirewallProfile -Profile Public -DefaultOutboundAction Allow -ErrorAction SilentlyContinue
+    
+    # 2. Set Policy Registry (For Nessus/CIS Compliance)
+    $RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsFirewall\PublicProfile"
+    $RegName = "DefaultOutboundAction"
+    $Value = 0
+    
+    if (!(Test-Path $RegPath)) {
+        New-Item -Path $RegPath -Force | Out-Null
+    }
+    
+    Set-ItemProperty -Path $RegPath -Name $RegName -Value $Value -Type DWord -Force
+    
+    $Msg = "Set Registry $RegName to $Value (Enabled)"
     Write-Host $Msg -ForegroundColor Green
-        $Status = "COMPLIANT"
+    $Status = "COMPLIANT"
+
 } catch {
     $Status = "NON-COMPLIANT"
 }
 
 Write-Host "=============================================================="
-Write-Host "Remediation completed at $(Get-Date)"
-Write-Host "Final Status: $Status"
+Write-Host "Remediation Status: $Status"
 Write-Host "=============================================================="
-if ($Status -eq "COMPLIANT") { exit 0 } else { exit 1 }
+
+if ($Status -eq "COMPLIANT") {
+    exit 0
+} else {
+    exit 1
+}

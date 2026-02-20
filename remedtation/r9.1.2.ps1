@@ -8,23 +8,38 @@ $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="
 Write-Host $StartMsg
-Write-Host "Control 9.1.2: FW Domain: Inbound"
+Write-Host "Control 9.1.2: FW Domain: Inbound connections"
 Write-Host "=============================================================="
 
-
-
 try {
-    $Profile = "Domain"
-    Set-NetFirewallProfile -Profile $Profile -DefaultInboundAction "Block"
-    $Msg = "Set Firewall $Profile DefaultInboundAction to Block"
+    # 1. Set Active Setting via Cmdlet (For immediate effect)
+    Set-NetFirewallProfile -Profile Domain -DefaultInboundAction Block -ErrorAction SilentlyContinue
+    
+    # 2. Set Policy Registry (For Nessus/CIS Compliance)
+    $RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsFirewall\DomainProfile"
+    $RegName = "DefaultInboundAction"
+    $Value = 1
+    
+    if (!(Test-Path $RegPath)) {
+        New-Item -Path $RegPath -Force | Out-Null
+    }
+    
+    Set-ItemProperty -Path $RegPath -Name $RegName -Value $Value -Type DWord -Force
+    
+    $Msg = "Set Registry $RegName to $Value (Enabled)"
     Write-Host $Msg -ForegroundColor Green
-        $Status = "COMPLIANT"
+    $Status = "COMPLIANT"
+
 } catch {
     $Status = "NON-COMPLIANT"
 }
 
 Write-Host "=============================================================="
-Write-Host "Remediation completed at $(Get-Date)"
-Write-Host "Final Status: $Status"
+Write-Host "Remediation Status: $Status"
 Write-Host "=============================================================="
-if ($Status -eq "COMPLIANT") { exit 0 } else { exit 1 }
+
+if ($Status -eq "COMPLIANT") {
+    exit 0
+} else {
+    exit 1
+}
