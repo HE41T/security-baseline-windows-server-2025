@@ -1,49 +1,44 @@
 # ==============================================================
 # CIS Check: 19.7.8.2 (L1) - Audit Script
-# Description: Ensure 'Do not suggest third-party content in Windows spotlight' is set to 'Enabled' (Automated)
-# Verification: Export USER_RIGHTS via secedit and look for the pattern: Do not suggest third-party content
+# Description: Ensure 'Do not suggest third-party content in Windows spotlight' is set to 'Enabled'
+# Registry Path: HKCU:\Software\Policies\Microsoft\Windows\CloudContent\DisableThirdPartySuggestions
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$SubKey = "Software\Policies\Microsoft\Windows\CloudContent"
-$ValueName = "DisableThirdPartySuggestions"
 $DesiredValue = 1
+$RegPath = "HKCU:\Software\Policies\Microsoft\Windows\CloudContent"
+$ValueName = "DisableThirdPartySuggestions"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 19.7.8.2: Verify third-party content in Windows spotlight is disabled"
+Write-Host "Control 19.7.8.2: Check Third-Party Content Suggestions"
 Write-Host "=============================================================="
 
-$Status = "COMPLIANT"
-$UserSids = Get-ChildItem HKU: | Where-Object {
-    $n = $_.Name
-    ([regex]::IsMatch($n, 'HKEY_USERS\\S-1-5-') -and -not [regex]::IsMatch($n, '_Classes$'))
-} | ForEach-Object {
-    Split-Path -Path $_.Name -Leaf
-} | Sort-Object -Unique
-
-if (-not $UserSids) {
-    Write-Host "No user hives found to audit." -ForegroundColor Yellow
-} else {
-    foreach ($Sid in $UserSids) {
-        try {
-            $Path = Join-Path "HKU:\$Sid" $SubKey
-            if (Test-Path $Path) {
-                $Value = Get-ItemPropertyValue -Path $Path -Name $ValueName -ErrorAction SilentlyContinue
-                if ($Value -eq $DesiredValue) {
-                    Write-Host "SID ${Sid}: Compliant ($ValueName = $Value)" -ForegroundColor Green
-                } else {
-                    Write-Host "SID ${Sid}: Non-compliant ($ValueName = $Value)" -ForegroundColor Red
-                    $Status = "NON-COMPLIANT"
-                }
-            } else {
-                Write-Host "SID ${Sid}: Policy path not found (Non-compliant)." -ForegroundColor Red
-                $Status = "NON-COMPLIANT"
-            }
-        } catch {
-            Write-Host "SID ${Sid}: Audit failure ($_.Exception.Message)" -ForegroundColor Yellow
+function Get-ThirdPartySuggestStatus {
+    try {
+        if (-not (Test-Path -Path $RegPath)) {
+            return $null
         }
+        $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
+        return [int]$Value
+    } catch {
+        return $null
     }
+}
+
+$CurrentValue = Get-ThirdPartySuggestStatus
+
+if ($null -eq $CurrentValue) {
+    Write-Host "[!] Value is NOT configured via GPO (Default allows suggestions)." -ForegroundColor Yellow
+    $Status = "NON-COMPLIANT"
+}
+elseif ($CurrentValue -eq $DesiredValue) {
+    Write-Host "Value is Compliant ($CurrentValue - Third-Party Suggestions are Blocked)." -ForegroundColor Green
+    $Status = "COMPLIANT"
+}
+else {
+    Write-Host "Value is incorrect ($CurrentValue). Third-Party Suggestions are ALLOWED!" -ForegroundColor Red
+    $Status = "NON-COMPLIANT"
 }
 
 Write-Host "=============================================================="

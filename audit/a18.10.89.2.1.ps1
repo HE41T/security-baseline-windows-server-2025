@@ -1,46 +1,43 @@
 # ==============================================================
 # CIS Check: 18.10.89.2.1 (L1) - Audit Script
-# Description: Ensure 'Allow Basic authentication' is set to 'Disabled' (Automated)
-# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service
+# Description: Ensure 'Allow Basic authentication' for WinRM Service is set to 'Disabled'
+# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service\AllowBasic
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$RegPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\WinRM\\Service"
-$ValueName = "AllowBasic"
 $DesiredValue = 0
-$ValueType = "DWord"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service"
+$ValueName = "AllowBasic"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 18.10.89.2.1: Ensure 'Allow Basic authentication' is set to 'Disabled' (Automated)"
+Write-Host "Control 18.10.89.2.1: Check WinRM Service Basic Auth Status"
 Write-Host "=============================================================="
 
-function Get-PolicyValue {
+function Get-WinRMServiceBasicAuth {
     try {
         if (-not (Test-Path -Path $RegPath)) {
             return $null
         }
         $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
-        if ($ValueType -eq "DWord") {
-            return [int]$Value
-        }
-        return [string]$Value
+        return [int]$Value
     } catch {
-        Write-Host "[!] Failed reading registry value: $_" -ForegroundColor Yellow
         return $null
     }
 }
 
-$CurrentValue = Get-PolicyValue
+$CurrentValue = Get-WinRMServiceBasicAuth
 
 if ($null -eq $CurrentValue) {
-    Write-Host "[!] Unable to determine current setting." -ForegroundColor Yellow
+    Write-Host "[!] Value is NOT configured via GPO (Default is Disabled)." -ForegroundColor Yellow
     $Status = "NON-COMPLIANT"
-} elseif ($CurrentValue -eq $DesiredValue) {
-    Write-Host "Current value is $CurrentValue. Policy is compliant." -ForegroundColor Green
+}
+elseif ($CurrentValue -eq $DesiredValue) {
+    Write-Host "Value is Compliant ($CurrentValue - Basic Auth is Rejected)." -ForegroundColor Green
     $Status = "COMPLIANT"
-} else {
-    Write-Host "Current value is $CurrentValue. Expected: $DesiredValue." -ForegroundColor Red
+}
+else {
+    Write-Host "Value is incorrect ($CurrentValue). WinRM Service is ACCEPTING Basic Auth!" -ForegroundColor Red
     $Status = "NON-COMPLIANT"
 }
 

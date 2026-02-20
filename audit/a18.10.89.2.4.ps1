@@ -1,46 +1,43 @@
 # ==============================================================
 # CIS Check: 18.10.89.2.4 (L1) - Audit Script
-# Description: Ensure 'Disallow WinRM from storing RunAs credentials' is set to 'Enabled' (Automated)
-# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service
+# Description: Ensure 'Disallow WinRM from storing RunAs credentials' is set to 'Enabled'
+# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service\DisableRunAs
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$RegPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\WinRM\\Service"
-$ValueName = "DisableRunAs"
 $DesiredValue = 1
-$ValueType = "DWord"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WinRM\Service"
+$ValueName = "DisableRunAs"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 18.10.89.2.4: Ensure 'Disallow WinRM from storing RunAs credentials' is set to 'Enabled' (Automated)"
+Write-Host "Control 18.10.89.2.4: Check WinRM RunAs Credential Storage"
 Write-Host "=============================================================="
 
-function Get-PolicyValue {
+function Get-WinRMDisableRunAs {
     try {
         if (-not (Test-Path -Path $RegPath)) {
             return $null
         }
         $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
-        if ($ValueType -eq "DWord") {
-            return [int]$Value
-        }
-        return [string]$Value
+        return [int]$Value
     } catch {
-        Write-Host "[!] Failed reading registry value: $_" -ForegroundColor Yellow
         return $null
     }
 }
 
-$CurrentValue = Get-PolicyValue
+$CurrentValue = Get-WinRMDisableRunAs
 
 if ($null -eq $CurrentValue) {
-    Write-Host "[!] Unable to determine current setting." -ForegroundColor Yellow
+    Write-Host "[!] Value is NOT configured via GPO (Default is Disabled/Risk)." -ForegroundColor Yellow
     $Status = "NON-COMPLIANT"
-} elseif ($CurrentValue -eq $DesiredValue) {
-    Write-Host "Current value is $CurrentValue. Policy is compliant." -ForegroundColor Green
+}
+elseif ($CurrentValue -eq $DesiredValue) {
+    Write-Host "Value is Compliant ($CurrentValue - RunAs Credential Storage is Blocked)." -ForegroundColor Green
     $Status = "COMPLIANT"
-} else {
-    Write-Host "Current value is $CurrentValue. Expected: $DesiredValue." -ForegroundColor Red
+}
+else {
+    Write-Host "Value is incorrect ($CurrentValue). WinRM is ALLOWED to store RunAs credentials!" -ForegroundColor Red
     $Status = "NON-COMPLIANT"
 }
 

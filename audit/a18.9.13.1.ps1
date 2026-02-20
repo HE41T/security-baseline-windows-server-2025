@@ -1,10 +1,10 @@
 ﻿# ==============================================================
 # CIS Check: 18.9.13.1 (L1) - Audit Script
-# Description: Ensure 18.9.13.1 DriverLoadPolicy is set to 8
+# Description: Ensure 18.9.13.1 DriverLoadPolicy is set to 3
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$DesiredValue = 8
+$DesiredValue = 3
 $RegPath = "HKLM:\SYSTEM\CurrentControlSet\Policies\EarlyLaunch"
 $RegName = "DriverLoadPolicy"
 

@@ -1,14 +1,14 @@
 # ==============================================================
 # CIS Check: 18.10.15.1 (L1) - Audit Script
 # Description: Ensure 'Do not display the password reveal button' is set to 'Enabled'
-# GPO Path: Computer Configuration > Administrative Templates > System > Logon > Do not display the password reveal button
-# Registry Path: HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\CredUI
+# GPO Path: Computer Configuration > Administrative Templates > Windows Components > Credential User Interface > Do not display the password reveal button
+# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredUI\DisablePasswordReveal
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$RegPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\CredUI"
-$ValueName = "DisablePasswordReveal"
 $DesiredValue = 1
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CredUI"
+$ValueName = "DisablePasswordReveal"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
@@ -24,7 +24,7 @@ function Get-PasswordRevealValue {
         $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
         return [int]$Value
     } catch {
-        Write-Host "[!] Failed reading registry value: $_" -ForegroundColor Yellow
+        Write-Host "[!] Unable to read registry value: $_" -ForegroundColor Yellow
         return $null
     }
 }
@@ -36,11 +36,11 @@ if ($null -eq $CurrentValue) {
     $Status = "NON-COMPLIANT"
 }
 elseif ($CurrentValue -eq $DesiredValue) {
-    Write-Host "Value is $CurrentValue. Policy is compliant." -ForegroundColor Green
+    Write-Host "Value is Enabled ($CurrentValue)." -ForegroundColor Green
     $Status = "COMPLIANT"
-} else {
-    Write-Host "Current value is $CurrentValue. Expected: $DesiredValue." -ForegroundColor Red
-    Write-Host "Policy is not compliant." -ForegroundColor Red
+}
+else {
+    Write-Host "Value is incorrect ($CurrentValue). Expected: $DesiredValue (Enabled)." -ForegroundColor Red
     $Status = "NON-COMPLIANT"
 }
 

@@ -1,96 +1,37 @@
 # ==============================================================
 # CIS Check: 18.10.93.4.3 (L1) - Remediation Script
-# Description: Ensure 'Select when Quality Updates are received' is set to 'Enabled: 0 days' (Automated)
+# Description: Set Quality Update Deferral to 0 days
 # ==============================================================
 
-$LogFile = "C:\Windows\Temp\remediate_18.10.93.4.3.log"
+$LogFile = "C:\Windows\Temp\remediate_wu_quality_deferral.log"
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate"
-$Settings = @(
-    [pscustomobject]@{ Name = "DeferQualityUpdates"; Value = 1; Description = "Enable deferral of quality updates" },
-    [pscustomobject]@{ Name = "DeferQualityUpdatesPeriodInDays"; Value = 0; Description = "Set quality update deferral to 0 days" }
-)
-$StartMsg = "Remediation started: $Date"
 
 Write-Host "=============================================================="
-Write-Host $StartMsg
-Write-Host "Control 18.10.93.4.3: Set quality update deferral to 0 days"
+Write-Host "Remediation started: $Date"
+Write-Host "Setting Quality Update Deferral to 0 days"
 Write-Host "=============================================================="
 
-Add-Content -Path $LogFile -Value "`n=============================================================="
-Add-Content -Path $LogFile -Value $StartMsg
+Add-Content -Path $LogFile -Value "Remediation started: $Date"
 
-function Get-SettingValue {
-    param(
-        [pscustomobject]$Setting
-    )
-    try {
-        if (-not (Test-Path -Path $RegPath)) {
-            return $null
-        }
-        return Get-ItemPropertyValue -Path $RegPath -Name $Setting.Name -ErrorAction Stop
-    } catch {
-        return $null
-    }
-}
-
-function Set-SettingValue {
-    [CmdletBinding(SupportsShouldProcess=$true)]
-    param(
-        [pscustomobject]$Setting
-    )
-    if (-not $PSCmdlet.ShouldProcess("$RegPath\$($Setting.Name)", "Set $($Setting.Name) to $($Setting.Value)")) {
-        return
-    }
+try {
     if (-not (Test-Path -Path $RegPath)) {
         New-Item -Path $RegPath -Force | Out-Null
     }
-    Set-ItemProperty -Path $RegPath -Name $Setting.Name -Value $Setting.Value -Type DWord -Force
-}
 
-$Status = "COMPLIANT"
-foreach ($Setting in $Settings) {
-    $HeaderMsg = "Processing $($Setting.Name): $($Setting.Description)"
-    Write-Host $HeaderMsg
-    Add-Content -Path $LogFile -Value $HeaderMsg
-
-    $CurrentValue = Get-SettingValue -Setting $Setting
-    if ($CurrentValue -eq $Setting.Value) {
-        $InfoMsg = "Current value for $($Setting.Name) is already $($Setting.Value)."
-        Write-Host $InfoMsg -ForegroundColor Green
-        Add-Content -Path $LogFile -Value $InfoMsg
-        continue
-    }
-
-    $InfoMsg = "Current value is '$CurrentValue'. Setting to $($Setting.Value)."
-    Write-Host $InfoMsg -ForegroundColor Yellow
-    Add-Content -Path $LogFile -Value $InfoMsg
-    try {
-        Set-SettingValue -Setting $Setting
-        $NewValue = Get-SettingValue -Setting $Setting
-        if ($NewValue -eq $Setting.Value) {
-            $SuccessMsg = "Configured $($Setting.Name). New value is $NewValue."
-            Write-Host $SuccessMsg -ForegroundColor Green
-            Add-Content -Path $LogFile -Value $SuccessMsg
-        } else {
-            $FailMsg = "Verification failed for $($Setting.Name). Current value is '$NewValue'."
-            Write-Host $FailMsg -ForegroundColor Red
-            Add-Content -Path $LogFile -Value $FailMsg
-            $Status = "NON-COMPLIANT"
-        }
-    } catch {
-        $ErrorMsg = "Failed to set $($Setting.Name): $_"
-        Write-Host $ErrorMsg -ForegroundColor Red
-        Add-Content -Path $LogFile -Value $ErrorMsg
-        $Status = "NON-COMPLIANT"
-    }
+    # Enable Deferral Policy
+    Set-ItemProperty -Path $RegPath -Name "DeferQualityUpdates" -Value 1 -Type DWord -Force
+    # Set Period to 0 days (Immediate)
+    Set-ItemProperty -Path $RegPath -Name "DeferQualityUpdatesPeriodInDays" -Value 0 -Type DWord -Force
+    
+    Write-Host "Success: Quality Updates are now set to be received with 0 days deferral." -ForegroundColor Green
+    Add-Content -Path $LogFile -Value "Status: COMPLIANT - Deferral set to 0 days"
+    $ExitCode = 0
+} catch {
+    Write-Host "Error: Failed to set registry values. $_" -ForegroundColor Red
+    Add-Content -Path $LogFile -Value "Status: FAILED - $_"
+    $ExitCode = 1
 }
 
 Write-Host "=============================================================="
-Write-Host "Remediation completed at $(Get-Date)"
-Write-Host "Final Status: $Status"
-Write-Host "=============================================================="
-Add-Content -Path $LogFile -Value "Final Status: $Status"
-Add-Content -Path $LogFile -Value "=============================================================="
-
-if ($Status -eq "COMPLIANT") { exit 0 } else { exit 1 }
+exit $ExitCode

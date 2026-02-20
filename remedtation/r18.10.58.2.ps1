@@ -1,90 +1,53 @@
 # ==============================================================
 # CIS Check: 18.10.58.2 (L1) - Remediation Script
-# Description: Ensure 'Turn on Basic feed authentication over HTTP' is set to 'Disabled' (Automated)
-# Registry Path: HKLM\Software\Policies\Microsoft\Internet Explorer\Feeds
+# Description: Set 'Turn on Basic feed authentication over HTTP' to 'Disabled' (0)
 # ==============================================================
 
-$LogFile = "C:\Windows\Temp\remediate_18_10_58_2.log"
+$LogFile = "C:\Windows\Temp\remediate_rss_basic_auth.log"
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$RegPath = "HKLM\\Software\\Policies\\Microsoft\\Internet Explorer\\Feeds"
-$ValueName = "AllowBasicAuthInClear"
 $DesiredValue = 0
-$ValueType = "DWord"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds"
+$ValueName = "AllowBasicAuthInClear"
 
-$StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="
-Write-Host $StartMsg
-Write-Host "Control 18.10.58.2: Ensure 'Turn on Basic feed authentication over HTTP' is set to 'Disabled' (Automated)"
+Write-Host "Remediation started: $Date"
+Write-Host "Disabling RSS Basic Authentication over HTTP (Registry: 0)"
 Write-Host "=============================================================="
 
-Add-Content -Path $LogFile -Value "`n=============================================================="
-Add-Content -Path $LogFile -Value $StartMsg
+Add-Content -Path $LogFile -Value "Remediation started: $Date"
 
-function Get-PolicyValue {
-    try {
-        if (-not (Test-Path -Path $RegPath)) {
-            return $null
-        }
-        $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
-        if ($ValueType -eq "DWord") {
-            return [int]$Value
-        }
-        return [string]$Value
-    } catch {
-        return $null
-    }
-}
+try {
+    # --- Auto-Generated LGPO Injection ---
+    $LgpoContent = @"
+Computer
+SOFTWARE\Policies\Microsoft\Internet Explorer\Feeds
+AllowBasicAuthInClear
+DWORD:0
+"@
+    
+    $LgpoFile = "C:\Windows\Temp\lgpo_temp_$ValueName.txt"
+    Set-Content -Path $LgpoFile -Value $LgpoContent -Encoding Ascii
 
-function Set-PolicyValue {
-    [CmdletBinding(SupportsShouldProcess=$true)]
-    param()
-    if (-not $PSCmdlet.ShouldProcess($RegPath, "Set $ValueName")) {
-        return
+    if (Test-Path "C:\Windows\Temp\LGPO.exe") {
+        & "C:\Windows\Temp\LGPO.exe" /q /t $LgpoFile | Out-Null
+        gpupdate /force | Out-Null
+        Write-Host "Success: Applied via LGPO.exe (GPO & Registry updated)" -ForegroundColor Green
+        Add-Content -Path $LogFile -Value "Status: COMPLIANT - Applied via LGPO"
+        $ExitCode = 0
+    } else {
+        Write-Host "[!] LGPO.exe not found! Applying to Registry only." -ForegroundColor Yellow
+        if (-not (Test-Path -Path "$RegPath")) { New-Item -Path "$RegPath" -Force | Out-Null }
+        Set-ItemProperty -Path "$RegPath" -Name "$ValueName" -Value $DesiredValue -Type DWord -Force
+        $ExitCode = 0
     }
-    if (-not (Test-Path -Path $RegPath)) {
-        New-Item -Path $RegPath -Force | Out-Null
-    }
-    Set-ItemProperty -Path $RegPath -Name $ValueName -Value $DesiredValue -Type $ValueType -Force
-}
 
-$CurrentValue = Get-PolicyValue
-
-if ($CurrentValue -eq $DesiredValue) {
-    $Msg = "Value is already $CurrentValue. No action needed."
-    Write-Host $Msg -ForegroundColor Green
-    Add-Content -Path $LogFile -Value $Msg
-    $Status = "COMPLIANT"
-} else {
-    $Msg = "Value is $CurrentValue. Setting to $DesiredValue."
-    Write-Host $Msg -ForegroundColor Yellow
-    Add-Content -Path $LogFile -Value $Msg
-    try {
-        Set-PolicyValue
-        $NewValue = Get-PolicyValue
-        if ($NewValue -eq $DesiredValue) {
-            $ResultMsg = "Fixed. New value is $NewValue."
-            Write-Host $ResultMsg -ForegroundColor Green
-            Add-Content -Path $LogFile -Value $ResultMsg
-            $Status = "COMPLIANT"
-        } else {
-            $FailMsg = "Verification failed. Current value is $NewValue."
-            Write-Host $FailMsg -ForegroundColor Red
-            Add-Content -Path $LogFile -Value $FailMsg
-            $Status = "NON-COMPLIANT"
-        }
-    } catch {
-        $ErrorMsg = "Failed to fix: $_"
-        Write-Host $ErrorMsg -ForegroundColor Red
-        Add-Content -Path $LogFile -Value $ErrorMsg
-        $Status = "NON-COMPLIANT"
-    }
+    if (Test-Path $LgpoFile) { Remove-Item -Path $LgpoFile -Force }
+    # ---------------------------------------
+} catch {
+    Write-Host "Error: Failed to set registry value. $_" -ForegroundColor Red
+    Add-Content -Path $LogFile -Value "Status: FAILED - $_"
+    $ExitCode = 1
 }
 
 Write-Host "=============================================================="
-Write-Host "Remediation completed at $(Get-Date)"
-Write-Host "Final Status: $Status"
-Write-Host "=============================================================="
-Add-Content -Path $LogFile -Value "Final Status: $Status"
-Add-Content -Path $LogFile -Value "=============================================================="
-
-if ($Status -eq "COMPLIANT") { exit 0 } else { exit 1 }
+exit $ExitCode

@@ -1,12 +1,12 @@
 ﻿# ==============================================================
 # CIS Check: 18.9.28.3 (L1) - Remediation Script
-# Description: Ensure 18.9.28.3 DontDisplayLockedUserId is set to 3
+# Description: Ensure 18.9.28.3 DontEnumerateConnectedUsers is set to 1
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$DesiredValue = 3
-$RegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
-$RegName = "DontDisplayLockedUserId"
+$DesiredValue = 1
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+$RegName = "DontEnumerateConnectedUsers"
 
 $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="

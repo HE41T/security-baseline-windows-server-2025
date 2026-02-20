@@ -1,34 +1,44 @@
 # ==============================================================
 # CIS Check: 18.10.80.2 (L1) - Audit Script
-# Description: Ensure 'Allow Windows Ink Workspace' is set to 'Enabled: On, but disallow access above lock' OR 'Enabled: Disabled' (Automated)
-# Verification: Export USER_RIGHTS via secedit and look for the pattern: Allow Windows Ink Workspace
+# Description: Ensure 'Allow Windows Ink Workspace' is set correctly
+# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace\AllowWindowsInkWorkspace
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\WindowsInkWorkspace"
 $ValueName = "AllowWindowsInkWorkspace"
-$AllowedValues = @(0, 1)
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 18.10.80.2: Ensure 'Allow Windows Ink Workspace' is restricted"
+Write-Host "Control 18.10.80.2: Check Windows Ink Workspace Access"
 Write-Host "=============================================================="
 
-$Status = "NON-COMPLIANT"
-try {
-    if (Test-Path -Path $RegPath) {
-        $CurrentValue = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction SilentlyContinue
-        if ($null -ne $CurrentValue -and $AllowedValues -contains $CurrentValue) {
-            Write-Host "Current value of '$ValueName' is $CurrentValue. Compliant." -ForegroundColor Green
-            $Status = "COMPLIANT"
-        } else {
-            Write-Host "Value '$ValueName' is set to '$CurrentValue'. Non-compliant." -ForegroundColor Red
+function Get-WindowsInkValue {
+    try {
+        if (-not (Test-Path -Path $RegPath)) {
+            return $null
         }
-    } else {
-        Write-Host "Registry path '$RegPath' was not found (Disabled/None)." -ForegroundColor Red
+        $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
+        return [int]$Value
+    } catch {
+        return $null
     }
-} catch {
-    Write-Host "[!] Failed to check registry: $_" -ForegroundColor Yellow
+}
+
+$CurrentValue = Get-WindowsInkValue
+
+if ($null -eq $CurrentValue) {
+    Write-Host "[!] Value is NOT configured (Default might allow access above lock)." -ForegroundColor Yellow
+    $Status = "NON-COMPLIANT"
+}
+elseif ($CurrentValue -eq 0 -or $CurrentValue -eq 1) {
+    $Mode = if ($CurrentValue -eq 0) { "Disabled" } else { "On, but disallow access above lock" }
+    Write-Host "Value is Compliant ($CurrentValue - $Mode)." -ForegroundColor Green
+    $Status = "COMPLIANT"
+}
+else {
+    Write-Host "Value is incorrect ($CurrentValue). Access above lock is likely ALLOWED!" -ForegroundColor Red
+    $Status = "NON-COMPLIANT"
 }
 
 Write-Host "=============================================================="

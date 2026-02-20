@@ -1,12 +1,12 @@
 ﻿# ==============================================================
 # CIS Check: 18.6.8.2 (L1) - Remediation Script
-# Description: Ensure 18.6.8.2 AuditClientDoesNotSupportEncryption is set to 1
+# Description: Ensure 18.6.8.2 AuditServerDoesNotSupportEncryption is set to 1
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 1
-$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters"
-$RegName = "AuditClientDoesNotSupportEncryption"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\LanmanWorkstation"
+$RegName = "AuditServerDoesNotSupportEncryptionn"
 
 $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="

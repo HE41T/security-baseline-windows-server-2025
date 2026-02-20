@@ -5,8 +5,8 @@
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 1
-$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft Services\AdmPwd"
-$RegName = "PasswordEncryptionEnabled"
+$RegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\LAPS"
+$RegName = "ADPasswordEncryptionEnabled"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"

@@ -1,49 +1,44 @@
 # ==============================================================
 # CIS Check: 19.7.8.1 (L1) - Audit Script
-# Description: Ensure 'Configure Windows spotlight on lock screen' is set to 'Disabled' (Automated)
-# Verification: Export USER_RIGHTS via secedit and look for the pattern: Configure Windows spotlight on lock
+# Description: Ensure 'Configure Windows spotlight on lock screen' is set to 'Disabled'
+# Registry Path: HKCU:\Software\Policies\Microsoft\Windows\CloudContent\ConfigureWindowsSpotlight
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$SubKey = "Software\Policies\Microsoft\Windows\CloudContent"
-$ValueName = "ConfigureWindowsSpotlight"
 $DesiredValue = 2
+$RegPath = "HKCU:\Software\Policies\Microsoft\Windows\CloudContent"
+$ValueName = "ConfigureWindowsSpotlight"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 19.7.8.1: Verify Windows spotlight on the lock screen is disabled"
+Write-Host "Control 19.7.8.1: Check Windows Spotlight on Lock Screen"
 Write-Host "=============================================================="
 
-$Status = "COMPLIANT"
-$UserSids = Get-ChildItem HKU: | Where-Object {
-    $n = $_.Name
-    ([regex]::IsMatch($n, 'HKEY_USERS\\S-1-5-') -and -not [regex]::IsMatch($n, '_Classes$'))
-} | ForEach-Object {
-    Split-Path -Path $_.Name -Leaf
-} | Sort-Object -Unique
-
-if (-not $UserSids) {
-    Write-Host "No user hives found to audit." -ForegroundColor Yellow
-} else {
-    foreach ($Sid in $UserSids) {
-        try {
-            $Path = Join-Path "HKU:\$Sid" $SubKey
-            if (Test-Path $Path) {
-                $Value = Get-ItemPropertyValue -Path $Path -Name $ValueName -ErrorAction SilentlyContinue
-                if ($Value -eq $DesiredValue) {
-                    Write-Host "SID ${Sid}: Compliant ($ValueName = $Value)" -ForegroundColor Green
-                } else {
-                    Write-Host "SID ${Sid}: Non-compliant ($ValueName = $Value)" -ForegroundColor Red
-                    $Status = "NON-COMPLIANT"
-                }
-            } else {
-                Write-Host "SID ${Sid}: Policy path not found (Non-compliant)." -ForegroundColor Red
-                $Status = "NON-COMPLIANT"
-            }
-        } catch {
-            Write-Host "SID ${Sid}: Audit failure ($_.Exception.Message)" -ForegroundColor Yellow
+function Get-SpotlightStatus {
+    try {
+        if (-not (Test-Path -Path $RegPath)) {
+            return $null
         }
+        $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
+        return [int]$Value
+    } catch {
+        return $null
     }
+}
+
+$CurrentValue = Get-SpotlightStatus
+
+if ($null -eq $CurrentValue) {
+    Write-Host "[!] Value is NOT configured via GPO (Default is Enabled)." -ForegroundColor Yellow
+    $Status = "NON-COMPLIANT"
+}
+elseif ($CurrentValue -eq $DesiredValue) {
+    Write-Host "Value is Compliant ($CurrentValue - Windows Spotlight is Disabled)." -ForegroundColor Green
+    $Status = "COMPLIANT"
+}
+else {
+    Write-Host "Value is incorrect ($CurrentValue). Windows Spotlight is ENABLED!" -ForegroundColor Red
+    $Status = "NON-COMPLIANT"
 }
 
 Write-Host "=============================================================="

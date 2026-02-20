@@ -1,12 +1,12 @@
 ﻿# ==============================================================
 # CIS Check: 18.9.28.4 (L1) - Remediation Script
-# Description: Ensure 18.9.28.4 DontEnumerateLocalUsers is set to 1
+# Description: Ensure 18.9.28.4 EnumerateLocalUsers is set to 0
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$DesiredValue = 1
-$RegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
-$RegName = "DontEnumerateLocalUsers"
+$DesiredValue = 0
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
+$RegName = "EnumerateLocalUsers"
 
 $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="

@@ -1,49 +1,44 @@
 # ==============================================================
 # CIS Check: 19.5.1.1 (L1) - Audit Script
-# Description: Ensure 'Turn off toast notifications on the lock screen' is set to 'Enabled' (Automated)
-# Verification: Export USER_RIGHTS via secedit and look for the pattern: Turn off toast notifications on
+# Description: Ensure 'Turn off toast notifications on the lock screen' is set to 'Enabled'
+# Registry Path: HKCU:\Software\Policies\Microsoft\Windows\CurrentVersion\PushNotifications\NoToastApplicationNotificationOnLockScreen
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$SubKey = "Software\Policies\Microsoft\Windows\CurrentVersion\PushNotifications"
-$ValueName = "NoToastApplicationNotificationOnLockScreen"
 $DesiredValue = 1
+$RegPath = "HKCU:\Software\Policies\Microsoft\Windows\CurrentVersion\PushNotifications"
+$ValueName = "NoToastApplicationNotificationOnLockScreen"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 19.5.1.1: Verify toast notifications on the lock screen are disabled"
+Write-Host "Control 19.5.1.1: Check Toast Notifications on Lock Screen"
 Write-Host "=============================================================="
 
-$Status = "COMPLIANT"
-$UserSids = Get-ChildItem HKU: | Where-Object {
-    $n = $_.Name
-    ([regex]::IsMatch($n, 'HKEY_USERS\\S-1-5-') -and -not [regex]::IsMatch($n, '_Classes$'))
-} | ForEach-Object {
-    Split-Path -Path $_.Name -Leaf
-} | Sort-Object -Unique
-
-if (-not $UserSids) {
-    Write-Host "No user hives found to audit." -ForegroundColor Yellow
-} else {
-    foreach ($Sid in $UserSids) {
-        try {
-            $Path = Join-Path "HKU:\$Sid" $SubKey
-            if (Test-Path $Path) {
-                $Value = Get-ItemPropertyValue -Path $Path -Name $ValueName -ErrorAction SilentlyContinue
-                if ($Value -eq $DesiredValue) {
-                    Write-Host "SID ${Sid}: Compliant ($ValueName = $Value)" -ForegroundColor Green
-                } else {
-                    Write-Host "SID ${Sid}: Non-compliant ($ValueName = $Value)" -ForegroundColor Red
-                    $Status = "NON-COMPLIANT"
-                }
-            } else {
-                Write-Host "SID ${Sid}: Policy path not found (Non-compliant)." -ForegroundColor Red
-                $Status = "NON-COMPLIANT"
-            }
-        } catch {
-            Write-Host "SID ${Sid}: Audit failure ($_.Exception.Message)" -ForegroundColor Yellow
+function Get-LockScreenToastStatus {
+    try {
+        if (-not (Test-Path -Path $RegPath)) {
+            return $null
         }
+        $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
+        return [int]$Value
+    } catch {
+        return $null
     }
+}
+
+$CurrentValue = Get-LockScreenToastStatus
+
+if ($null -eq $CurrentValue) {
+    Write-Host "[!] Value is NOT configured (Default allows notifications)." -ForegroundColor Yellow
+    $Status = "NON-COMPLIANT"
+}
+elseif ($CurrentValue -eq $DesiredValue) {
+    Write-Host "Value is Compliant ($CurrentValue - Toast Notifications are Disabled)." -ForegroundColor Green
+    $Status = "COMPLIANT"
+}
+else {
+    Write-Host "Value is incorrect ($CurrentValue). Notifications are ALLOWED on Lock Screen!" -ForegroundColor Red
+    $Status = "NON-COMPLIANT"
 }
 
 Write-Host "=============================================================="

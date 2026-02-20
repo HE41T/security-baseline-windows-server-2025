@@ -5,7 +5,7 @@
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 1
-$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\LanmanServer"
 $RegName = "AuditInsecureGuestLogon"
 
 $StartMsg = "Remediation started: $Date"

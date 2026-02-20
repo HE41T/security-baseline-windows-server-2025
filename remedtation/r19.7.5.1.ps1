@@ -1,65 +1,53 @@
 # ==============================================================
 # CIS Check: 19.7.5.1 (L1) - Remediation Script
-# Description: Ensure 'Do not preserve zone information in file attachments' is set to 'Disabled' (Automated)
-# Instructions: Set the per-user registry key under each loaded HKU hive
+# Description: Set 'Do not preserve zone information' to 'Disabled' (Registry: 2)
 # ==============================================================
 
-$LogFile = "C:\\Windows\\Temp\\remediate_19.7.5.1.log"
+$LogFile = "$env:TEMP\remediate_attachment_zone_info.log"
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$SubPath = "Software\Microsoft\Windows\CurrentVersion\Policies\Attachments"
-$ValueName = "SaveZoneInformation"
 $DesiredValue = 2
+$RegPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Attachments"
+$ValueName = "SaveZoneInformation"
 
-$StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="
-Write-Host $StartMsg
-Write-Host "Control 19.7.5.1: Ensure 'Do not preserve zone information in file attachments' is set to 'Disabled' (Automated)"
+Write-Host "Remediation started: $Date"
+Write-Host "Ensuring Zone Information is preserved (Registry: 2)"
 Write-Host "=============================================================="
 
-Add-Content -Path $LogFile -Value "`n=============================================================="
-Add-Content -Path $LogFile -Value $StartMsg
+Add-Content -Path $LogFile -Value "Remediation started: $Date"
 
-function Set-UserValue {
+try {
+    # --- Auto-Generated LGPO Injection ---
+    $LgpoContent = @"
+User
+Software\Microsoft\Windows\CurrentVersion\Policies\Attachments
+SaveZoneInformation
+DWORD:2
+"@
+    
+    $LgpoFile = "C:\Windows\Temp\lgpo_temp_$ValueName.txt"
+    Set-Content -Path $LgpoFile -Value $LgpoContent -Encoding Ascii
 
-    param(
-        [Parameter(Mandatory=$true)]
-        [string]$Sid
-    )
-    $RegRoot = Join-Path "HKU:\$Sid" "$SubPath"
-    if (-not (Test-Path -Path $RegRoot)) {
-        New-Item -Path $RegRoot -Force | Out-Null
+    if (Test-Path "C:\Windows\Temp\LGPO.exe") {
+        & "C:\Windows\Temp\LGPO.exe" /q /t $LgpoFile | Out-Null
+        gpupdate /force | Out-Null
+        Write-Host "Success: Applied via LGPO.exe (GPO & Registry updated)" -ForegroundColor Green
+        Add-Content -Path $LogFile -Value "Status: COMPLIANT - Applied via LGPO"
+        $ExitCode = 0
+    } else {
+        Write-Host "[!] LGPO.exe not found! Applying to Registry only." -ForegroundColor Yellow
+        if (-not (Test-Path -Path "$RegPath")) { New-Item -Path "$RegPath" -Force | Out-Null }
+        Set-ItemProperty -Path "$RegPath" -Name "$ValueName" -Value $DesiredValue -Type DWord -Force
+        $ExitCode = 0
     }
-    Set-ItemProperty -Path $RegRoot -Name $ValueName -Value $DesiredValue -Type DWord -Force
-    try {
-        $Current = Get-ItemPropertyValue -Path $RegRoot -Name $ValueName -ErrorAction Stop
-        return [int]$Current
-    } catch {
-        return $null
-    }
-}
 
-$Status = "COMPLIANT"
-$Sids = Get-ChildItem HKU:\ | Where-Object { $_.PSChildName -match '^S-1-5-21-' }
-if (-not $Sids) {
-    $Msg = "No user hives found under HKU:\"; Write-Host $Msg -ForegroundColor Yellow; Add-Content -Path $LogFile -Value $Msg
-    $Status = "NON-COMPLIANT"
-} else {
-    foreach ($Sid in $Sids) {
-        $NewValue = Set-UserValue -Sid $Sid.PSChildName
-        if ($NewValue -eq $DesiredValue) {
-            $Msg = "$($Sid.PSChildName): Set to $NewValue."; Write-Host $Msg -ForegroundColor Green; Add-Content -Path $LogFile -Value $Msg
-        } else {
-            $Msg = "$($Sid.PSChildName): Failed to set value (current $NewValue)."; Write-Host $Msg -ForegroundColor Red; Add-Content -Path $LogFile -Value $Msg
-            $Status = "NON-COMPLIANT"
-        }
-    }
+    if (Test-Path $LgpoFile) { Remove-Item -Path $LgpoFile -Force }
+    # ---------------------------------------
+} catch {
+    Write-Host "Error: Failed to set registry value. $_" -ForegroundColor Red
+    Add-Content -Path $LogFile -Value "Status: FAILED - $_"
+    $ExitCode = 1
 }
 
 Write-Host "=============================================================="
-Write-Host "Remediation completed at $(Get-Date)"
-Write-Host "Final Status: $Status"
-Write-Host "=============================================================="
-Add-Content -Path $LogFile -Value "Final Status: $Status"
-Add-Content -Path $LogFile -Value "=============================================================="
-
-if ($Status -eq "COMPLIANT") { exit 0 } else { exit 1 }
+exit $ExitCode

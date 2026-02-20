@@ -4,9 +4,9 @@
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$DesiredValue = 1
-$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Rpc"
-$RegName = "ServerRpcProtocol"
+$DesiredValue = 5
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers\RPC"
+$RegName = "RpcProtocols"
 
 $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="

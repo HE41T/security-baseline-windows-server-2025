@@ -1,46 +1,43 @@
 # ==============================================================
 # CIS Check: 18.10.92.2.1 (L1) - Audit Script
-# Description: Ensure 'Prevent users from modifying settings' is set to 'Enabled' (Automated)
-# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection
+# Description: Ensure 'Prevent users from modifying settings' (Exploit Protection) is set to 'Enabled'
+# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection\DisallowExploitProtectionOverride
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$RegPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender Security Center\\App and Browser protection"
-$ValueName = "DisallowExploitProtectionOverride"
 $DesiredValue = 1
-$ValueType = "DWord"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\App and Browser protection"
+$ValueName = "DisallowExploitProtectionOverride"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 18.10.92.2.1: Ensure 'Prevent users from modifying settings' is set to 'Enabled' (Automated)"
+Write-Host "Control 18.10.92.2.1: Check Exploit Protection Modification Restriction"
 Write-Host "=============================================================="
 
-function Get-PolicyValue {
+function Get-ExploitProtectOverrideStatus {
     try {
         if (-not (Test-Path -Path $RegPath)) {
             return $null
         }
         $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
-        if ($ValueType -eq "DWord") {
-            return [int]$Value
-        }
-        return [string]$Value
+        return [int]$Value
     } catch {
-        Write-Host "[!] Failed reading registry value: $_" -ForegroundColor Yellow
         return $null
     }
 }
 
-$CurrentValue = Get-PolicyValue
+$CurrentValue = Get-ExploitProtectOverrideStatus
 
 if ($null -eq $CurrentValue) {
-    Write-Host "[!] Unable to determine current setting." -ForegroundColor Yellow
+    Write-Host "[!] Value is NOT configured via GPO (Default allows modification)." -ForegroundColor Yellow
     $Status = "NON-COMPLIANT"
-} elseif ($CurrentValue -eq $DesiredValue) {
-    Write-Host "Current value is $CurrentValue. Policy is compliant." -ForegroundColor Green
+}
+elseif ($CurrentValue -eq $DesiredValue) {
+    Write-Host "Value is Compliant ($CurrentValue - Users are PREVENTED from modifying settings)." -ForegroundColor Green
     $Status = "COMPLIANT"
-} else {
-    Write-Host "Current value is $CurrentValue. Expected: $DesiredValue." -ForegroundColor Red
+}
+else {
+    Write-Host "Value is incorrect ($CurrentValue). Users can STILL modify Exploit Protection!" -ForegroundColor Red
     $Status = "NON-COMPLIANT"
 }
 

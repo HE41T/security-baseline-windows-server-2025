@@ -1,12 +1,12 @@
 ﻿# ==============================================================
 # CIS Check: 18.6.7.7 (L1) - Remediation Script
-# Description: Ensure 18.6.7.7 AuthRateLimiterDelayInMs is set to 2000
+# Description: Ensure 18.6.7.7 InvalidAuthenticationDelayTimeInMs is set to 2000
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 2000
-$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters"
-$RegName = "AuthRateLimiterDelayInMs"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\LanmanServer"
+$RegName = "InvalidAuthenticationDelayTimeInMs"
 
 $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="

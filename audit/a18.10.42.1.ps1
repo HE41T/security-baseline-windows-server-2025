@@ -1,46 +1,46 @@
 # ==============================================================
 # CIS Check: 18.10.42.1 (L1) - Audit Script
-# Description: Ensure 'Block all consumer Microsoft account user authentication' is set to 'Enabled' (Automated)
-# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\MicrosoftAccount
+# Description: Ensure 'Block all consumer Microsoft account user authentication' is set to 'Enabled'
+# GPO Path: Computer Configuration > Administrative Templates > Windows Components > Microsoft Account > Block all consumer Microsoft account user authentication
+# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\Messenger\Client\MicrosoftAccountConsumerAuthentication
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$RegPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\MicrosoftAccount"
-$ValueName = "DisableUserAuth"
-$DesiredValue = 1
-$ValueType = "DWord"
+$DesiredValue = 0
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Messenger\Client"
+$ValueName = "MicrosoftAccountConsumerAuthentication"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
-Write-Host "Control 18.10.42.1: Ensure 'Block all consumer Microsoft account user authentication' is set to 'Enabled' (Automated)"
+Write-Host "Control 18.10.42.1: Ensure Consumer Microsoft Account Auth is Blocked"
 Write-Host "=============================================================="
 
-function Get-PolicyValue {
+function Get-MSAccountBlockValue {
     try {
         if (-not (Test-Path -Path $RegPath)) {
             return $null
         }
+
         $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
-        if ($ValueType -eq "DWord") {
-            return [int]$Value
-        }
-        return [string]$Value
+        return [int]$Value
     } catch {
-        Write-Host "[!] Failed reading registry value: $_" -ForegroundColor Yellow
+        Write-Host "[!] Unable to read registry value: $_" -ForegroundColor Yellow
         return $null
     }
 }
 
-$CurrentValue = Get-PolicyValue
+$CurrentValue = Get-MSAccountBlockValue
 
 if ($null -eq $CurrentValue) {
-    Write-Host "[!] Unable to determine current setting." -ForegroundColor Yellow
+    Write-Host "[!] Unable to determine current setting or value does not exist." -ForegroundColor Yellow
     $Status = "NON-COMPLIANT"
-} elseif ($CurrentValue -eq $DesiredValue) {
-    Write-Host "Current value is $CurrentValue. Policy is compliant." -ForegroundColor Green
+}
+elseif ($CurrentValue -eq $DesiredValue) {
+    Write-Host "Value is Enabled (Block active: $CurrentValue)." -ForegroundColor Green
     $Status = "COMPLIANT"
-} else {
-    Write-Host "Current value is $CurrentValue. Expected: $DesiredValue." -ForegroundColor Red
+}
+else {
+    Write-Host "Value is incorrect ($CurrentValue). Expected: $DesiredValue (Blocked)." -ForegroundColor Red
     $Status = "NON-COMPLIANT"
 }
 

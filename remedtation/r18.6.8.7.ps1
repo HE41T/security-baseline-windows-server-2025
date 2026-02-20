@@ -1,12 +1,12 @@
 ﻿# ==============================================================
 # CIS Check: 18.6.8.7 (L1) - Remediation Script
-# Description: Ensure 18.6.8.7 EncryptData is set to 1
+# Description: Ensure 18.6.8.7 RequireEncryption is set to 1
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 1
-$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters"
-$RegName = "EncryptData"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\LanmanWorkstation"
+$RegName = "RequireEncryption"
 
 $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="

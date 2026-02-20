@@ -1,12 +1,11 @@
 # ==============================================================
 # CIS Check: 18.10.43.6.1.2 (L1) - Audit Script
-# Description: Ensure 'Configure Attack Surface Reduction rules: Set the state for each ASR rule' is configured (Automated)
-# Verification Method: Export USER_RIGHTS via secedit and look for the ASR INF entry
+# Description: Ensure 'Configure Attack Surface Reduction rules: Set the state for each ASR rule' is configured
+# Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules
 # ==============================================================
 
-$Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR\Rules"
-$Rules = @(
+$ASRRules = @(
     "26190899-1602-49e8-8b27-eb1d0a1ce869", "3b576869-a4ec-4529-8536-b80a7769e899",
     "56a863a9-875e-4185-98a7-b882c64b5ce5", "5beb7efe-fd9a-4556-801d-275e5ffc04cc",
     "75668c1f-73b5-4cf0-bb93-3ecf5cb7cc84", "7674ba52-37eb-4a4f-a9a1-f0f9a1619a2c",
@@ -16,34 +15,36 @@ $Rules = @(
 )
 
 Write-Host "=============================================================="
-Write-Host "Audit started: $Date"
-Write-Host "Control 18.10.43.6.1.2: Ensure ASR rules are configured"
+Write-Host "Audit started: $(Get-Date)"
+Write-Host "Checking ASR Rules Configuration..."
 Write-Host "=============================================================="
 
-$Status = "COMPLIANT"
-try {
-    if (Test-Path -Path $RegPath) {
-        foreach ($Guid in $Rules) {
-            $Value = Get-ItemPropertyValue -Path $RegPath -Name $Guid -ErrorAction SilentlyContinue
-            if ($null -eq $Value -or $Value -ne "1") {
-                Write-Host "Rule '$Guid' is NOT set to Block (current: $Value)." -ForegroundColor Red
-                $Status = "NON-COMPLIANT"
-            } else {
-                Write-Host "Rule '$Guid' is set to Block." -ForegroundColor Green
-            }
+if (-not (Test-Path $RegPath)) {
+    Write-Host "[!] Registry path for ASR rules not found." -ForegroundColor Red
+    exit 1
+}
+
+$AllCompliant = $true
+foreach ($Rule in $ASRRules) {
+    try {
+        $Value = Get-ItemPropertyValue -Path $RegPath -Name $Rule -ErrorAction Stop
+        if ($Value -eq "1") {
+            Write-Host "[OK] Rule $Rule is set to 1 (Block)." -ForegroundColor Green
+        } else {
+            Write-Host "[X] Rule $Rule is set to $Value (Expected: 1)." -ForegroundColor Red
+            $AllCompliant = $false
         }
-    } else {
-        Write-Host "Registry path '$RegPath' was not found." -ForegroundColor Red
-        $Status = "NON-COMPLIANT"
+    } catch {
+        Write-Host "[X] Rule $Rule is NOT configured." -ForegroundColor Red
+        $AllCompliant = $false
     }
-} catch {
-    Write-Host "[!] Failed to audit ASR rules: $_" -ForegroundColor Yellow
-    $Status = "NON-COMPLIANT"
 }
 
 Write-Host "=============================================================="
-Write-Host "Audit completed at $(Get-Date)"
-Write-Host "Status: $Status"
-Write-Host "=============================================================="
-
-if ($Status -eq "COMPLIANT") { exit 0 } else { exit 1 }
+if ($AllCompliant) {
+    Write-Host "Final Status: COMPLIANT" -ForegroundColor Green
+    exit 0
+} else {
+    Write-Host "Final Status: NON-COMPLIANT" -ForegroundColor Red
+    exit 1
+}

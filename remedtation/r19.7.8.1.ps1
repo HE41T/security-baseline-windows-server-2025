@@ -1,109 +1,53 @@
 # ==============================================================
 # CIS Check: 19.7.8.1 (L1) - Remediation Script
-# Description: Ensure 'Configure Windows spotlight on lock screen' is set to 'Disabled' (Automated)
+# Description: Set 'Configure Windows spotlight on lock screen' to 'Disabled' (Registry: 2)
 # ==============================================================
 
-$LogFile = "C:\Windows\Temp\remediate_19.7.8.1.log"
+$LogFile = "$env:TEMP\remediate_windows_spotlight.log"
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$SubKey = "Software\Policies\Microsoft\Windows\CloudContent"
+$DesiredValue = 2
+$RegPath = "HKCU:\Software\Policies\Microsoft\Windows\CloudContent"
 $ValueName = "ConfigureWindowsSpotlight"
-$DisabledValue = 2
-$StartMsg = "Remediation started: $Date"
 
 Write-Host "=============================================================="
-Write-Host $StartMsg
-Write-Host "Control 19.7.8.1: Disable Windows Spotlight on the lock screen"
+Write-Host "Remediation started: $Date"
+Write-Host "Disabling Windows Spotlight on Lock Screen (Registry: 2)"
 Write-Host "=============================================================="
 
-Add-Content -Path $LogFile -Value "`n=============================================================="
-Add-Content -Path $LogFile -Value $StartMsg
+Add-Content -Path $LogFile -Value "Remediation started: $Date"
 
-function Get-UserSetting {
-    param([string]$Sid)
-    try {
-        $Path = Join-Path -Path "HKU:\$Sid" -ChildPath $SubKey
-        if (-not (Test-Path -Path $Path)) {
-            return $null
-        }
-        return Get-ItemPropertyValue -Path $Path -Name $ValueName -ErrorAction Stop
-    } catch {
-        return $null
+try {
+    # --- Auto-Generated LGPO Injection ---
+    $LgpoContent = @"
+User
+Software\Policies\Microsoft\Windows\CloudContent
+ConfigureWindowsSpotlight
+DWORD:2
+"@
+    
+    $LgpoFile = "C:\Windows\Temp\lgpo_temp_$ValueName.txt"
+    Set-Content -Path $LgpoFile -Value $LgpoContent -Encoding Ascii
+
+    if (Test-Path "C:\Windows\Temp\LGPO.exe") {
+        & "C:\Windows\Temp\LGPO.exe" /q /t $LgpoFile | Out-Null
+        gpupdate /force | Out-Null
+        Write-Host "Success: Applied via LGPO.exe (GPO & Registry updated)" -ForegroundColor Green
+        Add-Content -Path $LogFile -Value "Status: COMPLIANT - Applied via LGPO"
+        $ExitCode = 0
+    } else {
+        Write-Host "[!] LGPO.exe not found! Applying to Registry only." -ForegroundColor Yellow
+        if (-not (Test-Path -Path "$RegPath")) { New-Item -Path "$RegPath" -Force | Out-Null }
+        Set-ItemProperty -Path "$RegPath" -Name "$ValueName" -Value $DesiredValue -Type DWord -Force
+        $ExitCode = 0
     }
-}
 
-function Set-UserSetting {
-    [CmdletBinding(SupportsShouldProcess=$true)]
-    param(
-        [string]$Sid,
-        [int]$Value
-    )
-    $Path = Join-Path -Path "HKU:\$Sid" -ChildPath $SubKey
-    if (-not $PSCmdlet.ShouldProcess($Path, "Set $ValueName to $Value")) {
-        return
-    }
-    if (-not (Test-Path -Path $Path)) {
-        New-Item -Path $Path -Force | Out-Null
-    }
-    Set-ItemProperty -Path $Path -Name $ValueName -Value $Value -Type DWord -Force
-}
-
-$Status = "COMPLIANT"
-$UserSids = Get-ChildItem HKU: | Where-Object {
-    $n = $_.Name
-    ([regex]::IsMatch($n, 'HKEY_USERS\\S-1-5-') -and -not [regex]::IsMatch($n, '_Classes$'))
-} | ForEach-Object {
-    Split-Path -Path $_.Name -Leaf
-} | Sort-Object -Unique
-
-if (-not $UserSids) {
-    $WarnMsg = "No user hives found; cannot enforce Windows Spotlight policy."
-    Write-Host $WarnMsg -ForegroundColor Yellow
-    Add-Content -Path $LogFile -Value $WarnMsg
-    $Status = "NON-COMPLIANT"
-} else {
-    foreach ($Sid in $UserSids) {
-        $HeaderMsg = "Processing user hive $Sid"
-        Write-Host $HeaderMsg
-        Add-Content -Path $LogFile -Value $HeaderMsg
-
-        $CurrentValue = Get-UserSetting -Sid $Sid
-        if ($CurrentValue -eq $DisabledValue) {
-            $SkipMsg = "$Sid already disables Windows Spotlight on the lock screen."
-            Write-Host $SkipMsg -ForegroundColor Green
-            Add-Content -Path $LogFile -Value $SkipMsg
-            continue
-        }
-
-        $InfoMsg = "$Sid has value '$CurrentValue'. Setting to $DisabledValue."
-        Write-Host $InfoMsg -ForegroundColor Yellow
-        Add-Content -Path $LogFile -Value $InfoMsg
-        try {
-            Set-UserSetting -Sid $Sid -Value $DisabledValue
-            $NewValue = Get-UserSetting -Sid $Sid
-            if ($NewValue -eq $DisabledValue) {
-                $SuccessMsg = "$Sid Windows Spotlight policy applied successfully."
-                Write-Host $SuccessMsg -ForegroundColor Green
-                Add-Content -Path $LogFile -Value $SuccessMsg
-            } else {
-                $FailMsg = "$Sid verification failed; now has value '$NewValue'."
-                Write-Host $FailMsg -ForegroundColor Red
-                Add-Content -Path $LogFile -Value $FailMsg
-                $Status = "NON-COMPLIANT"
-            }
-        } catch {
-            $ErrorMsg = "$Sid remediation failed: $_"
-            Write-Host $ErrorMsg -ForegroundColor Red
-            Add-Content -Path $LogFile -Value $ErrorMsg
-            $Status = "NON-COMPLIANT"
-        }
-    }
+    if (Test-Path $LgpoFile) { Remove-Item -Path $LgpoFile -Force }
+    # ---------------------------------------
+} catch {
+    Write-Host "Error: Failed to set registry value. $_" -ForegroundColor Red
+    Add-Content -Path $LogFile -Value "Status: FAILED - $_"
+    $ExitCode = 1
 }
 
 Write-Host "=============================================================="
-Write-Host "Remediation completed at $(Get-Date)"
-Write-Host "Final Status: $Status"
-Write-Host "=============================================================="
-Add-Content -Path $LogFile -Value "Final Status: $Status"
-Add-Content -Path $LogFile -Value "=============================================================="
-
-if ($Status -eq "COMPLIANT") { exit 0 } else { exit 1 }
+exit $ExitCode

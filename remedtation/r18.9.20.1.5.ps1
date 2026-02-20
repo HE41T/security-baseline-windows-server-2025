@@ -1,12 +1,12 @@
 ﻿# ==============================================================
 # CIS Check: 18.9.20.1.5 (L1) - Remediation Script
-# Description: Ensure 18.9.20.1.5 TurnOffWebPublishing is set to 1
+# Description: Ensure 18.9.20.1.5 NoWebServices is set to 1
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 1
-$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WebPublish"
-$RegName = "TurnOffWebPublishing"
+$RegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer"
+$RegName = "NoWebServices"
 
 $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="

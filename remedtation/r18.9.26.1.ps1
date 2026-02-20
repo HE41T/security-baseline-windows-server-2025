@@ -1,12 +1,12 @@
 ﻿# ==============================================================
 # CIS Check: 18.9.26.1 (L1) - Remediation Script
-# Description: Ensure 18.9.26.1 AllowCustomSSPs is set to 0
+# Description: Ensure 18.9.26.1 AllowCustomSSPsAPs is set to 0
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 0
 $RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System"
-$RegName = "AllowCustomSSPs"
+$RegName = "AllowCustomSSPsAPs"
 
 $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="

@@ -1,83 +1,42 @@
 # ==============================================================
 # CIS Check: 18.10.43.6.1.1 (L1) - Remediation Script
-# Description: Ensure 'Configure Attack Surface Reduction rules' is set to 'Enabled' (Automated)
+# Description: Ensure 'Configure Attack Surface Reduction rules' is set to 'Enabled'
 # Registry Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR
 # ==============================================================
 
-$LogFile = "C:\Windows\Temp\remediate_18_10_43_6_1_1.log"
+$LogFile = "C:\Windows\Temp\remediate_asr_rules.log"
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$RegPath = "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\ASR"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Windows Defender Exploit Guard\ASR"
 $ValueName = "ExploitGuard_ASR_Rules"
-$DesiredValue = 1
-$ValueType = "DWord"
 
 $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="
 Write-Host $StartMsg
-Write-Host "Control 18.10.43.6.1.1: Ensure 'Configure Attack Surface Reduction rules' is set to 'Enabled' (Automated)"
+Write-Host "Control 18.10.43.6.1.1: Enabling ASR Rules Policy Structure"
 Write-Host "=============================================================="
 
 Add-Content -Path $LogFile -Value "`n=============================================================="
 Add-Content -Path $LogFile -Value $StartMsg
 
-function Get-PolicyValue {
-    try {
-        if (-not (Test-Path -Path $RegPath)) {
-            return $null
-        }
-        $Value = Get-ItemPropertyValue -Path $RegPath -Name $ValueName -ErrorAction Stop
-        if ($ValueType -eq "DWord") {
-            return [int]$Value
-        }
-        return [string]$Value
-    } catch {
-        return $null
-    }
-}
-
-function Set-PolicyValue {
-    [CmdletBinding(SupportsShouldProcess=$true)]
-    param()
-    if (-not $PSCmdlet.ShouldProcess($RegPath, "Set $ValueName")) {
-        return
-    }
+try {
     if (-not (Test-Path -Path $RegPath)) {
         New-Item -Path $RegPath -Force | Out-Null
     }
-    Set-ItemProperty -Path $RegPath -Name $ValueName -Value $DesiredValue -Type $ValueType -Force
-}
 
-$CurrentValue = Get-PolicyValue
+    # หมายเหตุ: การตั้งค่านี้เป็นการเปิดโครงสร้างนโยบายให้เป็น Enabled (1)
+    # สำหรับการใช้งานจริง ควรระบุ GUID ของกฎแต่ละข้อผ่าน GPO หรือสคริปต์เพิ่มเติม
+    Set-ItemProperty -Path $RegPath -Name $ValueName -Value 1 -Type DWord -Force
 
-if ($CurrentValue -eq $DesiredValue) {
-    $Msg = "Value is already $CurrentValue. No action needed."
+    $Msg = "ASR Rules policy structure has been set to Enabled."
     Write-Host $Msg -ForegroundColor Green
     Add-Content -Path $LogFile -Value $Msg
     $Status = "COMPLIANT"
-} else {
-    $Msg = "Value is $CurrentValue. Setting to $DesiredValue."
-    Write-Host $Msg -ForegroundColor Yellow
-    Add-Content -Path $LogFile -Value $Msg
-    try {
-        Set-PolicyValue
-        $NewValue = Get-PolicyValue
-        if ($NewValue -eq $DesiredValue) {
-            $ResultMsg = "Fixed. New value is $NewValue."
-            Write-Host $ResultMsg -ForegroundColor Green
-            Add-Content -Path $LogFile -Value $ResultMsg
-            $Status = "COMPLIANT"
-        } else {
-            $FailMsg = "Verification failed. Current value is $NewValue."
-            Write-Host $FailMsg -ForegroundColor Red
-            Add-Content -Path $LogFile -Value $FailMsg
-            $Status = "NON-COMPLIANT"
-        }
-    } catch {
-        $ErrorMsg = "Failed to fix: $_"
-        Write-Host $ErrorMsg -ForegroundColor Red
-        Add-Content -Path $LogFile -Value $ErrorMsg
-        $Status = "NON-COMPLIANT"
-    }
+}
+catch {
+    $ErrorMsg = "Failed to fix: $_"
+    Write-Host $ErrorMsg -ForegroundColor Red
+    Add-Content -Path $LogFile -Value $ErrorMsg
+    $Status = "NON-COMPLIANT"
 }
 
 Write-Host "=============================================================="

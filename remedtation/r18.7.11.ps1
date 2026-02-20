@@ -1,12 +1,12 @@
 ﻿# ==============================================================
 # CIS Check: 18.7.11 (L1) - Remediation Script
-# Description: Ensure 18.7.11 LimitQueueDrivers is set to 1
+# Description: Ensure 18.7.11 CopyFilesPolicy is set to 1
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 1
 $RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Printers"
-$RegName = "LimitQueueDrivers"
+$RegName = "CopyFilesPolicy"
 
 $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="

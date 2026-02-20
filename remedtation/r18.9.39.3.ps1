@@ -1,12 +1,12 @@
 ﻿# ==============================================================
 # CIS Check: 18.9.39.3 (L1) - Remediation Script
-# Description: Ensure 18.9.39.3 SamPwdChangePolicy is set to 2
+# Description: Ensure 18.9.39.3 SamrChangeUserPasswordApiPolicy is set to 3
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$DesiredValue = 2
-$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Rpc"
-$RegName = "SamPwdChangePolicy"
+$DesiredValue = 3
+$RegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\SAM"
+$RegName = "SamrChangeUserPasswordApiPolicy"
 
 $StartMsg = "Remediation started: $Date"
 Write-Host "=============================================================="

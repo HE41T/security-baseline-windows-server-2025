@@ -1,12 +1,12 @@
 ﻿# ==============================================================
 # CIS Check: 18.6.4.1 (L1) - Audit Script
-# Description: Ensure 18.6.4.1 EnableMulticast is set to 0
+# Description: Ensure 18.6.4.1 EnableMDNS is set to 0
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 0
 $RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient"
-$RegName = "EnableMulticast"
+$RegName = "EnableMDNS"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"

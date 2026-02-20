@@ -1,12 +1,12 @@
 ﻿# ==============================================================
 # CIS Check: 18.6.8.6 (L1) - Audit Script
-# Description: Ensure 18.6.8.6 MinSMB2Dialect is set to 785
+# Description: Ensure 18.6.8.6 MinSmb2Dialect is set to 785
 # ==============================================================
 
 $Date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $DesiredValue = 785
-$RegPath = "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters"
-$RegName = "MinSMB2Dialect"
+$RegPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\LanmanWorkstation"
+$RegName = "MinSmb2Dialect"
 
 Write-Host "=============================================================="
 Write-Host "Audit started: $Date"
